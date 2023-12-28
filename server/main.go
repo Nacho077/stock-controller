@@ -10,6 +10,7 @@ import (
 func main() {
 	app := gin.Default()
 
+
 	app.Use(func(ctx *gin.Context) {
 		ctx.Header("Access-Control-Allow-Origin", "*") // Especifica los orígenes permitidos
 		ctx.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
@@ -19,14 +20,17 @@ func main() {
 		ctx.Next()
 	})
 
-	router.GetRouter(app)
-
 	if err := godotenv.Load(".env"); err != nil {
 		panic(err.Error())
 	}
 
 	db := config.GetDB()
 	defer db.Close()
+
+	router.GetRouter(app, db)
+
+	//test := repository.CompaniesRepository{Db: db}
+	//test.GetCompanies()
 
 	app.Run("localhost:8080")
 }

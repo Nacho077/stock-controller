@@ -9,12 +9,14 @@ import (
 )
 
 func GetDB() *sql.DB {
-	db, err := sql.Open("mysql", getDSN())
+	dbName := os.Getenv("DB_NAME")
+
+	db, err := sql.Open("mysql", getDSN(dbName))
 	if err != nil {
 		panic(err.Error())
 	}
 
-	createDB(db)
+	createDB(db, dbName)
 
 	if err = db.Ping(); err != nil {
 		panic(err.Error())
@@ -23,39 +25,34 @@ func GetDB() *sql.DB {
 	return db
 }
 
-func getDSN() string {
+func getDSN(dbName string) string {
 	dbUser := os.Getenv("DB_USER")
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
+
+	fmt.Println(dbUser)
 
 	return fmt.Sprintf("%s@tcp(%s:%s)/%s", dbUser, dbHost, dbPort, dbName)
 }
 
-func createDB(db *sql.DB) {
-	_, err := db.Exec("CREATE DATABASE IF NOT EXISTS stock_controller")
+func createDB(db *sql.DB, dbName string) {
+
+	_, err := db.Query(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s.company (id integer AUTO_INCREMENT UNIQUE, name varchar(255) NOT NULL UNIQUE, PRIMARY KEY(id))", dbName))
 	if err != nil {
 		panic(err.Error())
 	}
 
-	_, err = db.Exec("USE stock_controller")
-
-	_, err = db.Query("CREATE TABLE IF NOT EXISTS company (id integer AUTO_INCREMENT UNIQUE, name varchar(255) NOT NULL, PRIMARY KEY(id))")
+	_, err = db.Query(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s.product (id integer AUTO_INCREMENT UNIQUE, code varchar(255) NOT NULL, name varchar(255) NOT NULL, brand varchar(255), detail varchar(255), company_id integer NOT NULL, PRIMARY KEY(id), CONSTRAINT fk_company FOREIGN KEY(company_id) REFERENCES %s.company(id))", dbName, dbName))
 	if err != nil {
 		panic(err.Error())
 	}
 
-	_, err = db.Query("CREATE TABLE IF NOT EXISTS product (id integer AUTO_INCREMENT UNIQUE, code varchar(255) NOT NULL, name varchar(255) NOT NULL, brand varchar(255), detail varchar(255), company_id integer NOT NULL, PRIMARY KEY(id), CONSTRAINT fk_company FOREIGN KEY(company_id) REFERENCES `company`(`id`))")
+	_, err = db.Query(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s.movement (id integer AUTO_INCREMENT UNIQUE, date varchar(50) NOT NULL, shipping_code varchar(255) NOT NULL, pallets integer, units integer, deposit varchar(255), observations varchar(255), PRIMARY KEY(id))", dbName))
 	if err != nil {
 		panic(err.Error())
 	}
 
-	_, err = db.Query("CREATE TABLE IF NOT EXISTS movement (id integer AUTO_INCREMENT UNIQUE, date varchar(50) NOT NULL, shipping_code varchar(255) NOT NULL, pallets integer, units integer, deposito varchar(255), PRIMARY KEY(id))")
-	if err != nil {
-		panic(err.Error())
-	}
-
-	_, err = db.Query("CREATE TABLE IF NOT EXISTS movements_products (id integer AUTO_INCREMENT UNIQUE, movement_id integer NOT NULL, product_id integer NOT NULL, PRIMARY KEY(id), CONSTRAINT fk_movement FOREIGN KEY(movement_id) REFERENCES `movement`(`id`), CONSTRAINT fk_product FOREIGN KEY(product_id) REFERENCES `product`(`id`))")
+	_, err = db.Query(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s.movements_products (id integer AUTO_INCREMENT UNIQUE, movement_id integer NOT NULL, product_id integer NOT NULL, PRIMARY KEY(id), CONSTRAINT fk_movement FOREIGN KEY(movement_id) REFERENCES %s.movement(id), CONSTRAINT fk_product FOREIGN KEY(product_id) REFERENCES %s.product(id))", dbName, dbName, dbName))
 	if err != nil {
 		panic(err.Error())
 	}
