@@ -1,10 +1,22 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
+import { usePingQuery } from './configs/api/apiconfig'
 import './App.css'
 
 function App() {
   const [count, setCount] = useState(0)
+  var test = usePingQuery({})
+  console.log(test)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await usePingQuery({});
+      console.log(result);
+    };
+
+    fetchData();
+  }, [count])
 
   return (
     <>
