@@ -9,6 +9,17 @@ import (
 
 func main() {
 	app := gin.Default()
+
+
+	app.Use(func(ctx *gin.Context) {
+		ctx.Header("Access-Control-Allow-Origin", "*") // Especifica los orígenes permitidos
+		ctx.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+		ctx.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		ctx.Header("Access-Control-Allow-Credentials", "true")
+
+		ctx.Next()
+	})
+
 	if err := godotenv.Load(".env"); err != nil {
 		panic(err.Error())
 	}
