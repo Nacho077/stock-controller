@@ -37,7 +37,7 @@ func getDSN(dbName string) string {
 
 func createDB(db *sql.DB, dbName string) {
 
-	_, err := db.Query(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s.company (id integer AUTO_INCREMENT UNIQUE, name varchar(255) NOT NULL, PRIMARY KEY(id))", dbName))
+	_, err := db.Query(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s.company (id integer AUTO_INCREMENT UNIQUE, name varchar(255) NOT NULL UNIQUE, PRIMARY KEY(id))", dbName))
 	if err != nil {
 		panic(err.Error())
 	}
@@ -47,7 +47,7 @@ func createDB(db *sql.DB, dbName string) {
 		panic(err.Error())
 	}
 
-	_, err = db.Query(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s.movement (id integer AUTO_INCREMENT UNIQUE, date varchar(50) NOT NULL, shipping_code varchar(255) NOT NULL, pallets integer, units integer, deposito varchar(255), PRIMARY KEY(id))", dbName))
+	_, err = db.Query(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s.movement (id integer AUTO_INCREMENT UNIQUE, date varchar(50) NOT NULL, shipping_code varchar(255) NOT NULL, pallets integer, units integer, deposit varchar(255), observations varchar(255), PRIMARY KEY(id))", dbName))
 	if err != nil {
 		panic(err.Error())
 	}
