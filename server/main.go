@@ -9,15 +9,17 @@ import (
 
 func main() {
 	app := gin.Default()
-
-	router.GetRouter(app)
-
 	if err := godotenv.Load(".env"); err != nil {
 		panic(err.Error())
 	}
 
 	db := config.GetDB()
 	defer db.Close()
+
+	router.GetRouter(app, db)
+
+	//test := repository.CompaniesRepository{Db: db}
+	//test.GetCompanies()
 
 	app.Run("localhost:8080")
 }
