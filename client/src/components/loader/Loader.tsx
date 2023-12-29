@@ -7,7 +7,7 @@ interface LoaderProps {
 }
 
 const Loader: React.FC<LoaderProps> = ({children, isLoading}) => {
-    if (isLoading) return <span className={styles.loader}></span>
+    if (isLoading) return <div className={styles.container}><span className={styles.loader}></span></div>
 
     return children
 }

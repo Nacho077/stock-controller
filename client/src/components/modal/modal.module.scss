@@ -7,8 +7,8 @@
     .modal {
         width: 700px;
         max-width: 90%;
-        height: 250px;
-        background-color: rgba(250, 250, 250, 0.25);
+        height: 200px;
+        background-color: rgba($primaryColor, 0.25);
         border-radius: 20px;
         position: relative;
         @include flex(column, center, center);

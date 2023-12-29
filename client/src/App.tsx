@@ -36,9 +36,7 @@ function App() {
   return (
     <>
       {isModalOpen ? 
-        <div className={styles.containerModal}>
-          {isModalOpen && <Modal data={modalData} onClose={hiddeModal}/>}
-        </div> :
+          <Modal data={modalData} onClose={hiddeModal}/> :
         <div className={styles.containerMain}>
           <Routes>
             <Route path="/" element={<Companies />}/>

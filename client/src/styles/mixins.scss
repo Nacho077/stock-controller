@@ -5,12 +5,12 @@
     font-size: 1em;
     font-weight: 500;
     font-family: inherit;
-    background-color: #1a1a1a;
+    background-color: $primaryColor;
     cursor: pointer;
     transition: border-color 0.25s;
 
     &:hover {
-        border-color: #646cff;
+        border-color: $buttonColor;
     }
 
     &button:hover 
@@ -25,5 +25,6 @@
     flex-direction: $direction;
     align-items: $align;
     justify-content: $justify;
+    flex-wrap: wrap;
 }
   
