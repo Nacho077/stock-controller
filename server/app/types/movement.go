@@ -1,13 +1,11 @@
 package types
 
-import "time"
-
 type Movement struct {
-	id           int
-	date         time.Time
-	shippingCode string
-	pallets      int
-	units        int
-	deposit      string
-	observations string
+	Id           int
+	Date         string //time.Time
+	ShippingCode string
+	Pallets      int
+	Units        int
+	Deposit      string
+	Observations string
 }
