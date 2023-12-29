@@ -11,7 +11,6 @@ type MovementRepositoryInterface interface {
 }
 
 func (repository Repository) GetMovementsByCompany(id int) ([]types.Movement, error) {
-	movements := make([]types.Movement, 0)
 
 	companyRow, err := repository.Db.Query("SELECT * FROM company WHERE company.id = ?", id)
 	if err != nil {
@@ -35,7 +34,9 @@ func (repository Repository) GetMovementsByCompany(id int) ([]types.Movement, er
 
 	movementsRow, err := repository.Db.Query(query)
 
+	movements := make([]types.Movement, 0)
 	var movement types.Movement
+
 	for movementsRow.Next() {
 		movementErr := movementsRow.Scan(&movement.Id, &movement.Date, &movement.ShippingCode, &movement.Pallets, &movement.Units, &movement.Deposit, &movement.Observations)
 		if movementErr != nil {

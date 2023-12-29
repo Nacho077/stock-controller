@@ -11,7 +11,7 @@ func (err BadRequestError) Error() string {
 }
 
 func NewBadRequestError(message string, internalMessage string) BadRequestError {
-	fmt.Println("Error: " + message + "internalMessage: " + internalMessage)
+	fmt.Println("Error: ", message, "internalMessage: ", internalMessage)
 
 	return BadRequestError{
 		message: message,
