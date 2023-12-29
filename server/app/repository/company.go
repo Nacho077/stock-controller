@@ -1,36 +1,26 @@
 package repository
 
 import (
-	"database/sql"
-	"fmt"
 	"github.com/stock-controller/app/errors"
+	"github.com/stock-controller/app/types"
 )
 
-type CompaniesRepositoryI interface {
-	GetCompanies() ([]Company, error)
+type CompaniesRepositoryInterface interface {
+	GetCompanies() ([]types.Company, error)
 }
 
-type CompaniesRepository struct {
-	Db *sql.DB
-}
-
-type Company struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
-}
-
-func (repository *CompaniesRepository) GetCompanies() ([]Company, error) {
-	var companies []Company
+func (repository Repository) GetCompanies() ([]types.Company, error) {
+	companies := make([]types.Company, 0)
 
 	rows, err := repository.Db.Query("SELECT * FROM company")
 	if err != nil {
-		return nil, errors.NewFailedDependency(fmt.Sprintf("Error in database when bringing all companies: %s", err.Error()))
+		return nil, errors.NewFailedDependencyError("Error in database when bringing all companies", err.Error())
 	}
 
 	for rows.Next() {
-		var company Company
+		var company types.Company
 		if err := rows.Scan(&company.Id, &company.Name); err != nil {
-			return nil, errors.NewInternalServerError(fmt.Sprintf("Error in database when converting rows to Companies: %s", err.Error()))
+			return nil, errors.NewInternalServerError("Error in database when converting rows to Companies", err.Error())
 		}
 		companies = append(companies, company)
 	}
