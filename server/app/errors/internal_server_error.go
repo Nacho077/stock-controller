@@ -11,7 +11,7 @@ func (err InternalServerError) Error() string {
 }
 
 func NewInternalServerError(message string, internalMessage string) InternalServerError {
-	fmt.Println(fmt.Sprintf("Error: %s, internalMessage: %s", message, internalMessage))
+	fmt.Println("Error: " + message + "internalMessage: " + internalMessage)
 
 	return InternalServerError{
 		message: message,

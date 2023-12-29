@@ -4,16 +4,16 @@ import (
 	"database/sql"
 	"github.com/gin-gonic/gin"
 	"github.com/stock-controller/app/repository"
-	"github.com/stock-controller/app/use_case"
+	"github.com/stock-controller/app/useCase"
 )
 
 func GetRouter(app *gin.Engine, db *sql.DB) {
 	generalRepository := repository.Repository{Db: db}
 
-	NewCompanyController := use_case.GetCompanies{CompanyRepository: generalRepository}
-	NewMovementsByCompanyController := use_case.GetMovementsByCompany{MovementRepository: generalRepository}
+	NewCompanyController := useCase.GetCompanies{CompanyRepository: generalRepository}
+	NewMovementsByCompanyController := useCase.GetMovementsByCompany{MovementRepository: generalRepository}
 
-	app.GET("/ping", use_case.PingController)
+	app.GET("/ping", useCase.PingController)
 
 	companyRoute := app.Group("/company")
 	companyRoute.GET("/", NewCompanyController.Handle)

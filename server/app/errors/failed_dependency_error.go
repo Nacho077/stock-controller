@@ -11,7 +11,7 @@ func (err FailedDependencyError) Error() string {
 }
 
 func NewFailedDependencyError(message string, internalMessage string) FailedDependencyError {
-	fmt.Println(fmt.Sprintf("Error: %s, internalMessage: %s", message, internalMessage))
+	fmt.Println("Error: " + message + "internalMessage: " + internalMessage)
 
 	return FailedDependencyError{
 		message: message,

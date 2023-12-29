@@ -1,4 +1,4 @@
-package use_case
+package useCase
 
 import (
 	"github.com/gin-gonic/gin"
@@ -20,6 +20,7 @@ func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
 	if err != nil {
 		status, errMessage := errors.HandleError(err)
 		ctx.JSON(status, errMessage)
+		return
 	}
 
 	movementsResult, err := repository.MovementRepository.GetMovementsByCompany(parsedId)

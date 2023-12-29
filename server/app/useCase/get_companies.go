@@ -1,4 +1,4 @@
-package use_case
+package useCase
 
 import (
 	"github.com/gin-gonic/gin"
@@ -11,7 +11,7 @@ type GetCompanies struct {
 	CompanyRepository repository.CompaniesRepositoryInterface
 }
 
-func (repository *GetCompanies) Handle(ctx *gin.Context) {
+func (repository GetCompanies) Handle(ctx *gin.Context) {
 	companies, err := repository.CompanyRepository.GetCompanies()
 	if err != nil {
 		status, errMessage := errors.HandleError(err)
