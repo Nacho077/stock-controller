@@ -30,8 +30,6 @@ func getDSN(dbName string) string {
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
 
-	fmt.Println(dbUser)
-
 	return fmt.Sprintf("%s@tcp(%s:%s)/%s", dbUser, dbHost, dbPort, dbName)
 }
 

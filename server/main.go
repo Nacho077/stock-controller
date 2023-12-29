@@ -28,8 +28,5 @@ func main() {
 
 	router.GetRouter(app, db)
 
-	//test := repository.CompaniesRepository{Db: db}
-	//test.GetCompanies()
-
 	app.Run("localhost:8080")
 }
