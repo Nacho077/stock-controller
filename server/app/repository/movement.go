@@ -18,7 +18,7 @@ func (repository Repository) GetMovementsByCompany(id int) ([]types.Movement, er
 	}
 
 	var company types.Company
-	if err := companyRow.Scan(&company.Id, &company.Name); err != nil {
+	if err = companyRow.Scan(&company.Id, &company.Name); err != nil {
 		return nil, errors.NewInternalServerError("Error in scan when converting company", err.Error())
 	}
 
@@ -38,8 +38,8 @@ func (repository Repository) GetMovementsByCompany(id int) ([]types.Movement, er
 	var movement types.Movement
 
 	for movementsRow.Next() {
-		movementErr := movementsRow.Scan(&movement.Id, &movement.Date, &movement.ShippingCode, &movement.Pallets, &movement.Units, &movement.Deposit, &movement.Observations)
-		if movementErr != nil {
+		err = movementsRow.Scan(&movement.Id, &movement.Date, &movement.ShippingCode, &movement.Pallets, &movement.Units, &movement.Deposit, &movement.Observations)
+		if err != nil {
 			return nil, errors.NewInternalServerError("Error in scan when converting movement", err.Error())
 		}
 		movements = append(movements, movement)
