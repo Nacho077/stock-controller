@@ -1,45 +1,50 @@
+import { Routes, Route } from 'react-router-dom'
+import { useAppSelector } from './hooks'
 import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import { usePingQuery } from './configs/api/apiconfig'
-import './App.css'
+
+import Companies from './components/companies/Companies'
+import Modal from './components/modal/Modal'
+
+import { ModalData } from './interfaces/interfaces'
+import styles from './App.module.scss'
 
 function App() {
-  const [count, setCount] = useState(0)
-  var test = usePingQuery({})
-  console.log(test)
+  const [isModalOpen, setModalOpen] = useState<boolean>(false)
+  const [modalData, setModalData] = useState<ModalData>({text: "", buttons: []})
+  const error = useAppSelector(state => state.reducer.error)
 
   useEffect(() => {
-    const fetchData = async () => {
-      const result = await usePingQuery({});
-      console.log(result);
-    };
+    if (error !== "") {
+      showModal({
+        text: error,
+        buttons: [{
+          text: "Aceptar",
+          onClick: hiddeModal
+        }]
+      })
+    }
+  }, [error])
 
-    fetchData();
-  }, [count])
+  const showModal = (modalData: ModalData) => {
+    setModalData(modalData)
+
+    setModalOpen(true)
+  }
+
+  const hiddeModal = () => setModalOpen(false)
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      {isModalOpen ? 
+        <div className={styles.containerModal}>
+          {isModalOpen && <Modal data={modalData} onClose={hiddeModal}/>}
+        </div> :
+        <div className={styles.containerMain}>
+          <Routes>
+            <Route path="/" element={<Companies />}/>
+          </Routes>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      }
     </>
   )
 }

@@ -1,23 +1,21 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { loadingStarted, loadingFinished } from '../redux/slice'
+import { getCompanies, setError } from '../redux/slice'
+import { ApiError } from '../../interfaces/interfaces'
 
 export const api = createApi({
-    baseQuery: fetchBaseQuery({baseUrl: 'http://localhost:8080', timeout: 1000}),
+    baseQuery: fetchBaseQuery({baseUrl: 'http://localhost:8080/', timeout: 1000}),
     endpoints: builder => ({
-        ping: builder.query({
+        getCompanies: builder.query({
             // method, body, headers, params(reibe un obj)
-            query: () => ({url: '/ping'}),
+            query: () => ({url: 'company/'}),
             async onQueryStarted({}, {dispatch, queryFulfilled}) {
-                dispatch(loadingStarted())
                 try {
-                    await queryFulfilled
-                    dispatch(loadingFinished())
-                } catch (err) {
-                    dispatch(loadingFinished())
+                    const result = await queryFulfilled
+                    dispatch(getCompanies(result.data))
+                } catch (err: any) {
+                    dispatch(setError(err.error as ApiError))
                 }
             }
         })
-    }),
+    })
 })
-
-export const { usePingQuery } = api
