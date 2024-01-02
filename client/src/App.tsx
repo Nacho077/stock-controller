@@ -19,7 +19,7 @@ function App() {
         text: error,
         buttons: [{
           text: "Aceptar",
-          onClick: hiddeModal
+          onClick: hideModal
         }]
       })
     }
@@ -31,18 +31,16 @@ function App() {
     setModalOpen(true)
   }
 
-  const hiddeModal = () => setModalOpen(false)
+  const hideModal = () => setModalOpen(false)
 
   return (
     <>
-      {isModalOpen ? 
-          <Modal data={modalData} onClose={hiddeModal}/> :
-        <div className={styles.containerMain}>
-          <Routes>
-            <Route path="/" element={<Companies />}/>
-          </Routes>
+      <div className={styles.containerMain}>
+      {isModalOpen && <div className={styles.modalContainer}><Modal data={modalData} onClose={hideModal}/></div>}
+        <Routes>
+          <Route path="/" element={<Companies />}/>
+        </Routes>
       </div>
-      }
     </>
   )
 }
