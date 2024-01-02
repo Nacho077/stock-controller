@@ -8,6 +8,7 @@ import (
 
 type MovementRepositoryInterface interface {
 	GetMovementsByCompany(id int) ([]types.Movement, error)
+	CreateMovement(movement types.Movement, productId int64) error
 }
 
 func (repository Repository) GetMovementsByCompany(id int) ([]types.Movement, error) {
@@ -46,4 +47,20 @@ func (repository Repository) GetMovementsByCompany(id int) ([]types.Movement, er
 	}
 
 	return movements, nil
+}
+
+func (repository Repository) CreateMovement(movement types.Movement, productId int64) error {
+	// Create new movement
+	result, err := repository.Db.Exec("INSERT INTO movement(date, shipping_code, pallets, units, deposit, observations) VALUES (?, ?, ?, ?, ?, ?)", movement.Date, movement.ShippingCode, movement.Pallets, movement.Units, movement.Deposit, movement.Observations)
+	if err != nil {
+		return errors.NewFailedDependencyError("Error when trying to save movements", err.Error())
+	}
+	movementId, _ := result.LastInsertId()
+
+	// Create relation between products and movements
+	if _, err = repository.Db.Exec("INSERT INTO movements_products(movement_id, product_id) VALUES (?, ?)", movementId, productId); err != nil {
+		return errors.NewFailedDependencyError("Error when trying to save movements", err.Error())
+	}
+
+	return nil
 }

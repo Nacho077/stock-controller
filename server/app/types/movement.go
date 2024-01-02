@@ -1,7 +1,7 @@
 package types
 
 type Movement struct {
-	Id           int
+	Id           *int
 	Date         string //time.Time
 	ShippingCode string
 	Pallets      int

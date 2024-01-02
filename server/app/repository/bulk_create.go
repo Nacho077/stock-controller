@@ -2,77 +2,60 @@ package repository
 
 import (
 	"github.com/stock-controller/app/errors"
-	"strings"
-	"time"
+	"github.com/stock-controller/app/types"
 )
 
 type BulkCreateRepositoryInterface interface {
-	BulkCreateData(dataToSave []any) error
+	BulkCreateData(dataToSave types.DataToSave) error
 }
 
-// VER FECHA
+//poner guardar toodo en minúscula
 
-type MovementsDataToSave struct {
-	Date         time.Time `json:"date"`
-	ShippingCode string    `json:"shipping_code"`
-	Pallets      string    `json:"pallets"`
-	Units        int       `json:"units"`
-	Code         string    `json:"code"`
-	Name         string    `json:"name"`
-	Brand        string    `json:"brand"`
-	Detail       string    `json:"detail"`
-	Deposit      string    `json:"deposit"`
-	Observations string    `json:"observations"`
-}
-
-type DataToSave struct {
-	CompanyName   string                `json:"company_name"`
-	MovementsData []MovementsDataToSave `json:"movements_data"`
-}
-
-func (repository Repository) BulkCreateData(dataToSave DataToSave) error {
+func (repository Repository) BulkCreateData(dataToSave types.DataToSave) error {
 
 	// Create name company
-	result, err := repository.Db.Exec("INSERT IGNORE INTO company(name) VALUES ('?')", dataToSave.CompanyName)
+	result, err := repository.Db.Exec("INSERT IGNORE INTO company(name) VALUES (?)", dataToSave.CompanyName)
 	if err != nil {
-		errors.NewFailedDependencyError("Error in create company name", err.Error())
+		return errors.NewFailedDependencyError("Error in create company", err.Error())
 	}
 
-	companyId, err := result.LastInsertId()
+	companyId, _ := result.LastInsertId()
 
-	// Create all company products
-	fieldsProductsEmpty := "('?', '?', '?', '?', '?'), "
+	if companyId == 0 {
+		var id int64
 
-	queryProductsBulk := "INSERT IGNORE INTO product(code, name, brand, detail, companyId) VALUES "
-	var fieldsProductsValues []interface{}
+		err = repository.Db.QueryRow("SELECT id FROM company WHERE name = ?", dataToSave.CompanyName).Scan(&id)
+		if err != nil {
+			return errors.NewFailedDependencyError("Error in get company id with name", err.Error())
+		}
+
+		companyId = id
+	}
+
+	productsCreated := make(map[string]int64)
 
 	for _, data := range dataToSave.MovementsData {
-		queryProductsBulk += fieldsProductsEmpty
-		fieldsProductsValues = append(fieldsProductsValues, data.Code, data.Name, data.Brand, data.Detail, companyId)
-	}
+		// Create all company products
+		var productId int64
 
-	queryProductsBulk = strings.TrimPrefix(queryProductsBulk, ", ")
+		if productsCreated[data.Name] != 0 {
+			productId = productsCreated[data.Name]
 
-	_, err = repository.Db.Query(queryProductsBulk, fieldsProductsValues...)
-	if err != nil {
-		errors.NewFailedDependencyError("Error in create movements bulk", err.Error())
-	}
+		} else {
+			newProduct := types.Product{Name: data.Name, Code: data.Code, Brand: data.Brand, Detail: data.Detail, CompanyId: companyId}
 
-	// Create all company movements
-	queryMovementsBulk := "INSERT IGNORE INTO movement(date, shipping_code, pallets, units,deposit, observations) VALUES "
-	fieldsMovementsEmpty := "('?', '?', '?', '?', '?', '?'), "
-	var fieldsMovementsValues []interface{}
+			productId, err = repository.CreateProduct(newProduct)
+			if err != nil {
+				return err
+			}
 
-	for _, data := range dataToSave.MovementsData {
-		queryMovementsBulk += fieldsMovementsEmpty
-		fieldsMovementsValues = append(fieldsMovementsValues, data.Code, data.ShippingCode, data.Pallets, data.Units, data.Deposit, data.Observations)
-	}
+			productsCreated[data.Name] = productId
+		}
 
-	queryMovementsBulk = strings.TrimPrefix(queryMovementsBulk, ", ") + " RETURNING id"
-
-	_, err = repository.Db.Query(queryMovementsBulk, fieldsMovementsValues...)
-	if err != nil {
-		errors.NewFailedDependencyError("Error in create movements bulk", err.Error())
+		newMovement := types.Movement{Date: data.Date, ShippingCode: data.ShippingCode, Pallets: data.Pallets, Units: data.Units, Deposit: data.Deposit, Observations: data.Observations}
+		if err = repository.CreateMovement(newMovement, productId); err != nil {
+			return err
+		}
 	}
 
 	return nil

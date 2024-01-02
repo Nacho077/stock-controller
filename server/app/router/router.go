@@ -10,13 +10,15 @@ import (
 func GetRouter(app *gin.Engine, db *sql.DB) {
 	generalRepository := repository.Repository{Db: db}
 
-	NewCompanyController := useCase.GetCompanies{CompanyRepository: generalRepository}
-	NewMovementsByCompanyController := useCase.GetMovementsByCompany{MovementRepository: generalRepository}
+	NewCompany := useCase.GetCompanies{CompanyRepository: generalRepository}
+	NewMovementsByCompany := useCase.GetMovementsByCompany{MovementRepository: generalRepository}
+	NewBulkCreate := useCase.BulkCreate{BulkCreateRepository: generalRepository}
 
 	app.GET("/ping", useCase.PingController)
 
 	companyRoute := app.Group("/company")
-	companyRoute.GET("/", NewCompanyController.Handle)
-	companyRoute.GET("/:id/movements", NewMovementsByCompanyController.Handle)
+	companyRoute.GET("/", NewCompany.Handle)
+	companyRoute.GET("/:id/movements", NewMovementsByCompany.Handle)
 
+	app.POST("/bulk-create", NewBulkCreate.Handle)
 }
