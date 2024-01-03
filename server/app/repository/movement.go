@@ -39,6 +39,7 @@ func (repository Repository) GetMovementsByCompany(id int) ([]types.Movement, er
 	var movement types.Movement
 
 	for movementsRow.Next() {
+		fmt.Println("&movement.Date", &movement.Date)
 		err = movementsRow.Scan(&movement.Id, &movement.Date, &movement.ShippingCode, &movement.Pallets, &movement.Units, &movement.Deposit, &movement.Observations)
 		if err != nil {
 			return nil, errors.NewInternalServerError("Error in scan when converting movement", err.Error())

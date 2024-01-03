@@ -9,8 +9,6 @@ type BulkCreateRepositoryInterface interface {
 	BulkCreateData(dataToSave types.DataToSave) error
 }
 
-//poner guardar toodo en minúscula
-
 func (repository Repository) BulkCreateData(dataToSave types.DataToSave) error {
 
 	// Create name company
