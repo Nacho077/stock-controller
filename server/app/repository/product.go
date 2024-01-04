@@ -13,8 +13,33 @@ type CreateProductRepositoryInterface interface {
 
 func (repository Repository) CreateProduct(productToCreate types.Product) (int64, error) {
 	var productId int64
+	var conditionValues []interface{}
 
-	repository.Db.QueryRow("SELECT id FROM product WHERE name = ? AND code = ? AND  company_id = ?", productToCreate.Name, productToCreate.Code, productToCreate.CompanyId).Scan(&productId)
+	conditions := "company_id = ?"
+	conditionValues = append(conditionValues, productToCreate.CompanyId)
+	query := fmt.Sprintf("SELECT id FROM product WHERE %s", conditions)
+
+	if productToCreate.Name != "" {
+		conditions += "name = ?"
+		conditionValues = append(conditionValues, productToCreate.Name)
+	}
+
+	if productToCreate.Code != "" {
+		conditions += "code = ?"
+		conditionValues = append(conditionValues, productToCreate.Code)
+	}
+
+	if productToCreate.Brand != "" {
+		conditions += "brand = ?"
+		conditionValues = append(conditionValues, productToCreate.Brand)
+	}
+
+	if productToCreate.Detail != "" {
+		conditions += "detail = ?"
+		conditionValues = append(conditionValues, productToCreate.Detail)
+	}
+
+	repository.Db.QueryRow(query, conditionValues...).Scan(&productId)
 
 	if productId != 0 {
 		return productId, nil
@@ -22,9 +47,21 @@ func (repository Repository) CreateProduct(productToCreate types.Product) (int64
 
 	var values []interface{}
 
-	emptyValues := "(?, ?, ?)"
-	valueNames := "code, name, company_id"
-	values = append(values, productToCreate.Code, productToCreate.Name, productToCreate.CompanyId)
+	emptyValues := "(?)"
+	valueNames := "company_id"
+	values = append(values, productToCreate.CompanyId)
+
+	if productToCreate.Name != "" {
+		emptyValues = utils.TrimSuffixAndAddText(emptyValues, ")", ", ?)")
+		valueNames = utils.TrimSuffixAndAddText(valueNames, ")", ", name")
+		values = append(values, productToCreate.Name)
+	}
+
+	if productToCreate.Code != "" {
+		emptyValues = utils.TrimSuffixAndAddText(emptyValues, ")", ", ?)")
+		valueNames = utils.TrimSuffixAndAddText(valueNames, ")", ", code")
+		values = append(values, productToCreate.Code)
+	}
 
 	if productToCreate.Brand != "" {
 		emptyValues = utils.TrimSuffixAndAddText(emptyValues, ")", ", ?)")
@@ -38,7 +75,7 @@ func (repository Repository) CreateProduct(productToCreate types.Product) (int64
 		values = append(values, productToCreate.Detail)
 	}
 
-	query := fmt.Sprintf("INSERT INTO product(%s) VALUES %s", valueNames, emptyValues)
+	query = fmt.Sprintf("INSERT INTO product(%s) VALUES %s", valueNames, emptyValues)
 
 	result, err := repository.Db.Exec(query, values...)
 	if err != nil {

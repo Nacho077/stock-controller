@@ -2,34 +2,36 @@ import csv
 from datetime import datetime
 from urllib import request, parse
 import os
+import json
 
-YEAR = datetime.now().year
-SERVER_ENDPOINT = 'localhost:8080'
+SERVER_ENDPOINT = 'http://localhost:8080'
 THIS_FILE = 'script/'
 
 def get_month(month_str):
     months = {
-        'ENE': 1,
-        'FEB': 2,
-        'MAR': 3,
-        'ABR': 4,
-        'MAY': 5,
-        'JUN': 6,
-        'JUL': 7,
-        'OCT': 8,
-        'SEP': 9,
-        'OCT': 10,
-        'NOV': 11,
-        'DIC': 12,
+        'ENE': "01",
+        'FEB': "02",
+        'MAR': "03",
+        'ABR': "04",
+        'MAY': "05",
+        'JUN': "06",
+        'JUL': "07",
+        'OCT': "08",
+        'SEP': "09",
+        'OCT': "10",
+        'NOV': "11",
+        'DIC': "12",
     }
 
     return months[month_str.upper()]
 
 def parse_date(date_str):
     # Función para convertir la fecha en el formato deseado
-    day, month = date_str.split('-')
+    day, month, year = date_str.split('/')
+    if (len(day) == 1):
+        day = "0" + day
 
-    return datetime(YEAR, get_month(month), int(day))
+    return "{}-{}-{}".format(year, get_month(month), day)
 
 def read_csv_and_send_data(csv_file_path, company_name):
     movements_data = []
@@ -40,6 +42,8 @@ def read_csv_and_send_data(csv_file_path, company_name):
 
         for row in csv_reader:
             date, shipping_code, pallets, units, code, name, brand, detail, deposit, observations = row
+
+            print(date, shipping_code, pallets, units, code, name, brand, detail, deposit, observations)
             data_object = {
                 "date": parse_date(date),
                 "shipping_code": shipping_code,
@@ -58,14 +62,14 @@ def read_csv_and_send_data(csv_file_path, company_name):
             
             movements_data.append(data_object)
 
-    url = SERVER_ENDPOINT + "/bulk"
+    url = SERVER_ENDPOINT + "/bulk-create"
     data = {
         "company_name": company_name,
         "movements_data": movements_data
         }
-    
-    data = parse.urlencode(data).encode('utf-8')
-    req = request.Request(url, data=data, method='POST')
+    data_encoded = json.dumps(data).encode('utf-8')
+    print(data)
+    req = request.Request(url, data=data_encoded, method='POST')
     with request.urlopen(req) as response:
         print(response.status, response.read().decode('utf-8'))
 
