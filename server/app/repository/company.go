@@ -7,6 +7,7 @@ import (
 
 type CompaniesRepositoryInterface interface {
 	GetCompanies() ([]types.Company, error)
+	CreateCompany(name string) error
 }
 
 func (repository Repository) GetCompanies() ([]types.Company, error) {
@@ -26,4 +27,28 @@ func (repository Repository) GetCompanies() ([]types.Company, error) {
 	}
 
 	return companies, nil
+}
+
+func (repository Repository) CreateCompany(name string) (int64, error) {
+	var companyId int64
+
+	result, err := repository.Db.Exec("INSERT IGNORE INTO company(name) VALUES (?)", name)
+	if err != nil {
+		return companyId, errors.NewFailedDependencyError("Error in create company", err.Error())
+	}
+
+	companyId, _ = result.LastInsertId()
+
+	if companyId == 0 {
+		var id int64
+
+		err = repository.Db.QueryRow("SELECT id FROM company WHERE name = ?", name).Scan(&id)
+		if err != nil {
+			return companyId, errors.NewFailedDependencyError("Error in get company id with name", err.Error())
+		}
+
+		companyId = id
+	}
+
+	return companyId, nil
 }

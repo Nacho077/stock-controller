@@ -21,6 +21,18 @@ def get_month(month_str):
         'OCT': "10",
         'NOV': "11",
         'DIC': "12",
+        '1': "01",
+        '2': "02",
+        '3': "03",
+        '4': "04",
+        '5': "05",
+        '6': "06",
+        '7': "07",
+        '8': "08",
+        '9': "09",
+        '10': "10",
+        '11': "11",
+        '12': "12",
     }
 
     return months[month_str.upper()]
@@ -43,7 +55,6 @@ def read_csv_and_send_data(csv_file_path, company_name):
         for row in csv_reader:
             date, shipping_code, pallets, units, code, name, brand, detail, deposit, observations = row
 
-            print(date, shipping_code, pallets, units, code, name, brand, detail, deposit, observations)
             data_object = {
                 "date": parse_date(date),
                 "shipping_code": shipping_code,
@@ -55,10 +66,12 @@ def read_csv_and_send_data(csv_file_path, company_name):
                 "observations": observations.strip()
             }
 
-            if pallets:
-                data_object["pallets"] = int(pallets.strip())
             if units:
                 data_object["units"] = int(units.strip().replace(',', ''))
+
+            if pallets.strip() != "" and int(pallets.strip()) > 0:
+                data_object["units"] = 100000
+                data_object["observations"] = "{} {} {}".format(pallets, " pallets", data_object["observations"]).strip()
             
             movements_data.append(data_object)
 

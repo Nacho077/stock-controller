@@ -17,7 +17,6 @@ func (repository Repository) CreateProduct(productToCreate types.Product) (int64
 
 	conditions := "company_id = ?"
 	conditionValues = append(conditionValues, productToCreate.CompanyId)
-	query := fmt.Sprintf("SELECT id FROM product WHERE %s", conditions)
 
 	if productToCreate.Name != "" {
 		conditions += "name = ?"
@@ -38,6 +37,8 @@ func (repository Repository) CreateProduct(productToCreate types.Product) (int64
 		conditions += "detail = ?"
 		conditionValues = append(conditionValues, productToCreate.Detail)
 	}
+
+	query := fmt.Sprintf("SELECT id FROM product WHERE %s", conditions)
 
 	repository.Db.QueryRow(query, conditionValues...).Scan(&productId)
 

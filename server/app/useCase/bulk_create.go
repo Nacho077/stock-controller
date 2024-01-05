@@ -1,7 +1,6 @@
 package useCase
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/stock-controller/app/errors"
 	"github.com/stock-controller/app/repository"
@@ -37,8 +36,6 @@ func (repository BulkCreate) getBodyData(ctx *gin.Context) (types.DataToSave, er
 	}
 
 	bodyData.CompanyName = strings.ToLower(bodyData.CompanyName)
-
-	fmt.Println("DATE", bodyData.MovementsData[0].Date)
 
 	for i, data := range bodyData.MovementsData {
 		bodyData.MovementsData[i].Code = strings.ToLower(data.Code)
