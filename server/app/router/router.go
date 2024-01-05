@@ -21,4 +21,7 @@ func GetRouter(app *gin.Engine, db *sql.DB) {
 	companyRoute.GET("/:id/movements", NewMovementsByCompany.Handle)
 
 	app.POST("/bulk-create", NewBulkCreate.Handle)
+	app.POST("/company", NewCompany.Handle)
+	//app.POST("/product", NewCompany.Handle)
+
 }
