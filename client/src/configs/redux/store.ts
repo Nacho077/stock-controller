@@ -5,7 +5,7 @@ import reducer from './slice'
 const store = configureStore({
     reducer: {
         [api.reducerPath]: api.reducer,
-        test: reducer
+        reducer
     },
     middleware: getDefaultMiddleware => getDefaultMiddleware().concat(api.middleware),
 })

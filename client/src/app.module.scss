@@ -1,0 +1,10 @@
+.containerMain {
+  padding: 0 2rem;
+  position: relative;
+
+  .modalContainer {
+    position: absolute;
+    top: -50vh;
+    right: 0;
+  }
+}
