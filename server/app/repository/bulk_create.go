@@ -11,7 +11,7 @@ type BulkCreateRepositoryInterface interface {
 func (repository Repository) BulkCreateData(dataToSave types.DataToSave) error {
 
 	// Create company
-	companyId, err := repository.CompanyExistValidate(dataToSave.CompanyName)
+	companyId, err := repository.CreateCompanyIfNotExist(dataToSave.CompanyName)
 	if err != nil {
 		return err
 	}
