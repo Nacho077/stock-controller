@@ -23,7 +23,7 @@ func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
 		return
 	}
 
-	movementsResult, err := repository.MovementRepository.GetMovementsByCompany(parsedId)
+	movementsResult, err := repository.MovementRepository.GetMovementsByCompanyId(parsedId)
 	if err != nil {
 		status, errMessage := errors.HandleError(err)
 		ctx.JSON(status, errMessage)
@@ -33,7 +33,7 @@ func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, movementsResult)
 }
 
-func (controller GetMovementsByCompany) validateId(id string) (int, error) {
+func (repository GetMovementsByCompany) validateId(id string) (int, error) {
 	parsedId, err := strconv.Atoi(id)
 	if err != nil {
 		return parsedId, errors.NewBadRequestError("Error in Id, id be must a number", err.Error())

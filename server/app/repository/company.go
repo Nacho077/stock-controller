@@ -7,6 +7,9 @@ import (
 
 type CompaniesRepositoryInterface interface {
 	GetCompanies() ([]types.Company, error)
+	GetCompanyIdByName(name string) (int64, error)
+	CreateCompanyIfNotExist(name string) (int64, error)
+	//CreateCompany(name string) (int64, error)
 }
 
 func (repository Repository) GetCompanies() ([]types.Company, error) {
@@ -27,3 +30,40 @@ func (repository Repository) GetCompanies() ([]types.Company, error) {
 
 	return companies, nil
 }
+
+func (repository Repository) CreateCompanyIfNotExist(name string) (int64, error) {
+	var companyId int64
+
+	result, err := repository.Db.Exec("INSERT IGNORE INTO company(name) VALUES (?)", name)
+	if err != nil {
+		return companyId, errors.NewFailedDependencyError("Error in create company", err.Error())
+	}
+
+	companyId, _ = result.LastInsertId()
+
+	return companyId, nil
+}
+
+func (repository Repository) GetCompanyIdByName(name string) (int64, error) {
+	var companyId int64
+
+	err := repository.Db.QueryRow("SELECT id FROM company WHERE name = ?", name).Scan(&companyId)
+	if err != nil {
+		return companyId, errors.NewFailedDependencyError("Error in get company id with name", err.Error())
+	}
+
+	return companyId, nil
+}
+
+//func (repository Repository) CreateCompany(name string) (*string, error) {
+//	companyId, err := repository.CreateCompanyIfNotExist(name)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	if companyId == 0 {
+//		//ERROR
+//	}
+//
+//	return
+//}

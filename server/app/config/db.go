@@ -40,7 +40,7 @@ func createDB(db *sql.DB, dbName string) {
 		panic(err.Error())
 	}
 
-	_, err = db.Query(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s.product (id integer AUTO_INCREMENT UNIQUE, code varchar(255) NOT NULL, name varchar(255) NOT NULL, brand varchar(255), detail varchar(255), company_id integer NOT NULL, PRIMARY KEY(id), CONSTRAINT fk_company FOREIGN KEY(company_id) REFERENCES %s.company(id))", dbName, dbName))
+	_, err = db.Query(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s.product (id integer AUTO_INCREMENT UNIQUE, code varchar(255), name varchar(255), brand varchar(255), detail varchar(255), company_id integer NOT NULL, PRIMARY KEY(id), CONSTRAINT fk_company FOREIGN KEY(company_id) REFERENCES %s.company(id))", dbName, dbName))
 	if err != nil {
 		panic(err.Error())
 	}
