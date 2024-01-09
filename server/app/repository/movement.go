@@ -8,7 +8,7 @@ import (
 
 type MovementRepositoryInterface interface {
 	GetMovementsByCompanyId(id int) ([]types.ProductMovement, error)
-	CreateMovement(movement types.Movement, productId int64) error
+	CreateMovement(movement types.Movement, productId *int64) error
 }
 
 func (repository Repository) GetMovementsByCompanyId(id int) ([]types.ProductMovement, error) {
@@ -30,6 +30,9 @@ func (repository Repository) GetMovementsByCompanyId(id int) ([]types.ProductMov
 	query += " WHERE company.id = ?"
 
 	movementsRow, err := repository.Db.Query(query, id)
+	if err != nil {
+		errors.NewFailedDependencyError("Error in database when bringing movements and related products", err.Error())
+	}
 
 	movements := make([]types.ProductMovement, 0)
 	var movement types.ProductMovement
@@ -45,9 +48,33 @@ func (repository Repository) GetMovementsByCompanyId(id int) ([]types.ProductMov
 	return movements, nil
 }
 
-func (repository Repository) CreateMovement(movement types.Movement, productId int64) error {
+func (repository Repository) CreateMovement(movement types.Movement, productId *int64) error {
 	// Create new movement
-	result, err := repository.Db.Exec("INSERT INTO movement(date, shipping_code, units, deposit, observations) VALUES (?, ?, ?, ?, ?)", movement.Date, movement.ShippingCode, movement.Units, movement.Deposit, movement.Observations)
+
+	if productId == nil {
+		return errors.NewInternalServerError("Error in Movement when trying to get product id", "Internal Error")
+	}
+
+	emptyValues := "?, ?, ?"
+	nameValues := "date, shipping_code, units"
+	values := []interface{}{movement.Date, movement.ShippingCode, movement.Units}
+
+	if movement.Deposit != nil && *movement.Deposit != "" {
+		emptyValues += ", ?"
+		nameValues += ", deposit"
+		values = append(values, movement.Deposit)
+	}
+
+	if movement.Observations != nil && *movement.Observations != "" {
+		emptyValues += ", ?"
+		nameValues += ", observations"
+		values = append(values, movement.Observations)
+	}
+
+	query := fmt.Sprintf("INSERT INTO movement(%s) VALUES (%s)", nameValues, emptyValues)
+
+	result, err := repository.Db.Exec(query, values...)
+
 	if err != nil {
 		return errors.NewFailedDependencyError("Error when trying to save movements", err.Error())
 	}
@@ -55,7 +82,7 @@ func (repository Repository) CreateMovement(movement types.Movement, productId i
 
 	// Create relation between products and movements
 	if _, err = repository.Db.Exec("INSERT INTO movements_products(movement_id, product_id) VALUES (?, ?)", movementId, productId); err != nil {
-		return errors.NewFailedDependencyError("Error when trying to save movements", err.Error())
+		return errors.NewFailedDependencyError("Error when trying to save movements_products", err.Error())
 	}
 
 	return nil

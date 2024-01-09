@@ -16,12 +16,14 @@ func GetRouter(app *gin.Engine, db *sql.DB) {
 
 	app.GET("/ping", useCase.PingController)
 
-	companyRoute := app.Group("/company")
-	companyRoute.GET("/", NewCompany.Handle)
-	companyRoute.GET("/:id/movements", NewMovementsByCompany.Handle)
-
 	app.POST("/bulk-create", NewBulkCreate.Handle)
-	app.POST("/company", NewCompany.Handle)
-	//app.POST("/product", NewCompany.Handle)
+
+	companyRoutes := app.Group("/company")
+	companyRoutes.GET("/", NewCompany.Handle)
+	companyRoutes.GET("/:id/movements", NewMovementsByCompany.Handle)
+	companyRoutes.POST("/", NewCompany.Handle)
+
+	//productRoutes := app.Group("/product")
+	//productRoutes.POST("/", NewCompany.Handle)
 
 }

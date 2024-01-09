@@ -7,7 +7,7 @@ import (
 
 type CompaniesRepositoryInterface interface {
 	GetCompanies() ([]types.Company, error)
-	GetCompanyId(name string) (int64, error)
+	GetCompanyIdByName(name string) (int64, error)
 	CreateCompanyIfNotExist(name string) (int64, error)
 	//CreateCompany(name string) (int64, error)
 }
@@ -44,7 +44,7 @@ func (repository Repository) CreateCompanyIfNotExist(name string) (int64, error)
 	return companyId, nil
 }
 
-func (repository Repository) GetCompanyId(name string) (int64, error) {
+func (repository Repository) GetCompanyIdByName(name string) (int64, error) {
 	var companyId int64
 
 	err := repository.Db.QueryRow("SELECT id FROM company WHERE name = ?", name).Scan(&companyId)
