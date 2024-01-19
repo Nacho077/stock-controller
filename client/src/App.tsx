@@ -2,10 +2,13 @@ import { Routes, Route } from 'react-router-dom'
 import { useAppSelector } from './hooks'
 import { useEffect, useState } from 'react'
 
-import Companies from './components/companies/Companies'
-import Modal from './components/modal/Modal'
+import NavBar from './components/navBar'
+import Modal from './components/modal'
+import Companies from './views/companies'
+import Movements from './views/movements'
 
-import { ModalData } from './interfaces/interfaces'
+import { ModalData } from './components/modal/interfaces'
+
 import styles from './App.module.scss'
 
 function App() {
@@ -36,10 +39,15 @@ function App() {
   return (
     <>
       <div className={styles.containerMain}>
-      {isModalOpen && <div className={styles.modalContainer}><Modal data={modalData} onClose={hideModal}/></div>}
-        <Routes>
-          <Route path="/" element={<Companies />}/>
-        </Routes>
+        {isModalOpen && <div className={styles.modalContainer}><Modal data={modalData} onClose={hideModal}/></div>}
+        <NavBar />
+        <main>
+          <Routes>
+            <Route path="/" element={<Companies />}/> {/* agregar footer */}
+            <Route path="/company/create" element={<h1>TEST</h1>} />
+            <Route path="/company/:companyId" element={<Movements />}/>
+          </Routes>
+        </main>
       </div>
     </>
   )

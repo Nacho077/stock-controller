@@ -1,10 +1,18 @@
+@import './styles/mixins.scss';
+
 .containerMain {
-  padding: 0 2rem;
   position: relative;
+  display: grid;
+  grid-template-rows: 10vh 90vh;
+  row-gap: 0px;
+
+  main {
+    max-height: 90vh;
+    overflow: auto;
+  }
 
   .modalContainer {
     position: absolute;
-    top: -50vh;
     right: 0;
   }
 }

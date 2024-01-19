@@ -1,14 +1,3 @@
-export interface ApiError {
-    data: string
-    status: number
-}
-
-export interface Company {
-    readonly id: number
-    name: string
-}
-
-// Interfaces for modal
 export interface Button {
     text: string
     onClick?: VoidFunction

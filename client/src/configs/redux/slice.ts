@@ -1,14 +1,15 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import { ApiError, Company } from '../../interfaces/interfaces.ts'
+import { ApiError } from '../api/apiError.ts'
+import { ProductMovement } from '../../views/movements/interfaces.ts'
 
 interface InitialState {
     error: string
-    companies: Company[]
+    movements: ProductMovement[],
 }
 
 const initialState: InitialState = {
     error: '',
-    companies: []
+    movements: []
 }
 
 const slice = createSlice({
@@ -22,12 +23,15 @@ const slice = createSlice({
         deleteError: (state) => {
             state.error = ''
         },
-        getCompanies: (state, action: PayloadAction<Company[]>) => {
-            state.companies.push(...action.payload)
+        setInitialMovements: (state, action: PayloadAction<ProductMovement[]>) => {
+            state.movements = action.payload
+        },
+        addMovement: (state, action: PayloadAction<ProductMovement>) => {
+            state.movements.unshift(action.payload)
         }
     }
 })
 
-export const { getCompanies, setError, deleteError } = slice.actions
+export const { setError, deleteError, setInitialMovements, addMovement } = slice.actions
 
 export default slice.reducer

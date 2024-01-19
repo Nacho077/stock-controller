@@ -1,0 +1,17 @@
+.containerMain {
+    height: 100%;
+    @include flex(column, center, space-between);
+    
+    .container {
+        justify-content: center;
+        width: 100%;
+        height: 70%;
+        @include flex(row, center, space-evenly);
+
+        .company {
+            text-transform: capitalize;
+            @include button();
+            width: 20%;
+        }
+    }
+}
