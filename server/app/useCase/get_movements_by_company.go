@@ -15,6 +15,20 @@ type GetMovementsByCompany struct {
 func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
 
 	id := ctx.Param("id")
+	page := ctx.Query("page")
+	pageSize := ctx.Query("page_size")
+	//codeFilter := ctx.Query("code")
+	//nameFilter := ctx.Query("name")
+	//brandFilter := ctx.Query("brand")
+	order := ctx.Query("order")
+
+	limit, offset, err := repository.getOffset(page, pageSize)
+
+	if err != nil {
+		status, errMessage := errors.HandleError(err)
+		ctx.JSON(status, errMessage)
+		return
+	}
 
 	parsedId, err := repository.validateId(id)
 	if err != nil {
@@ -23,7 +37,9 @@ func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
 		return
 	}
 
-	movementsResult, err := repository.MovementRepository.GetMovementsByCompanyId(parsedId)
+	filter := "0"
+
+	movementsResult, err := repository.MovementRepository.GetMovementsByCompanyId(parsedId, limit, offset, filter, order)
 	if err != nil {
 		status, errMessage := errors.HandleError(err)
 		ctx.JSON(status, errMessage)
@@ -35,6 +51,7 @@ func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
 
 func (repository GetMovementsByCompany) validateId(id string) (int, error) {
 	parsedId, err := strconv.Atoi(id)
+
 	if err != nil {
 		return parsedId, errors.NewBadRequestError("Error in Id, id be must a number", err.Error())
 	}
@@ -45,3 +62,32 @@ func (repository GetMovementsByCompany) validateId(id string) (int, error) {
 
 	return parsedId, nil
 }
+
+func (repository GetMovementsByCompany) getOffset(page string, pageSize string) (int, int, error) {
+
+	if page == "" || page == "0" {
+		page = "1"
+	}
+
+	if pageSize == "" {
+		pageSize = "10"
+	}
+
+	parsedPage, err := strconv.Atoi(page)
+	if err != nil {
+		return parsedPage, 0, errors.NewBadRequestError("Error in Page, page be must a number", err.Error())
+	}
+
+	parsedPageSize, err := strconv.Atoi(pageSize)
+	if err != nil {
+		return parsedPageSize, 0, errors.NewBadRequestError("Error in page size, size be must a number", err.Error())
+	}
+
+	offset := (parsedPage - 1) * parsedPageSize
+
+	return parsedPageSize, offset, nil
+}
+
+//func (repository GetMovementsByCompany) validateFilters(filter string, order string) () {
+//	filter
+//}

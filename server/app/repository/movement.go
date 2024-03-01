@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"github.com/stock-controller/app/errors"
 	"github.com/stock-controller/app/types"
+	"strings"
 )
 
 type MovementRepositoryInterface interface {
-	GetMovementsByCompanyId(id int) ([]types.ProductMovement, error)
+	GetMovementsByCompanyId(id int, limit int, offset int, filter string, order string) ([]types.ProductMovement, error)
 	CreateMovement(movement types.Movement, productId *int64) error
 }
 
-func (repository Repository) GetMovementsByCompanyId(id int) ([]types.ProductMovement, error) {
+func (repository Repository) GetMovementsByCompanyId(id int, limit int, offset int, filter string, order string) ([]types.ProductMovement, error) {
 	var company types.Company
 
 	err := repository.Db.QueryRow("SELECT * FROM company WHERE company.id = ?", id).Scan(&company.Id, &company.Name)
@@ -23,13 +24,27 @@ func (repository Repository) GetMovementsByCompanyId(id int) ([]types.ProductMov
 		return nil, errors.NewBadRequestError(fmt.Sprintf("Company with id %d doesn't exist", id), "User error")
 	}
 
+	values := []interface{}{id, limit, offset}
+	if filter != "" {
+
+		strings.ToLower(filter)
+		values = append(values, filter)
+	}
+
+	if order != "" {
+		strings.ToUpper(order)
+		values = append(values, order)
+	}
+
 	query := "SELECT product.*, movement.* FROM company"
 	query += " INNER JOIN product ON product.company_id = company.id"
 	query += " INNER JOIN movements_products ON movements_products.product_id = product.id"
 	query += " INNER JOIN movement ON movement.id = movements_products.movement_id"
 	query += " WHERE company.id = ?"
+	query += " LIMIT ? OFFSET ?"
+	query += " ORDER BY ? ?"
 
-	movementsRow, err := repository.Db.Query(query, id)
+	movementsRow, err := repository.Db.Query(query, values...)
 	if err != nil {
 		errors.NewFailedDependencyError("Error in database when bringing movements and related products", err.Error())
 	}

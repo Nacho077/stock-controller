@@ -112,8 +112,9 @@ func (repository Repository) GetProducts(product types.Product) ([]types.Product
 	if rows != nil {
 		var product types.Product
 		for rows.Next() {
-			err = rows.Scan(&product.Id, &product.Name, &product.Code, &product.Brand, &product.Detail, &product.CompanyId)
+			err = rows.Scan(&product.Id, product.Name, &product.Code, product.Brand, product.Detail, &product.CompanyId)
 			if err != nil {
+				fmt.Println(product)
 				return nil, errors.NewInternalServerError("Error in scan when trying get product", err.Error())
 			}
 

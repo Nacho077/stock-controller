@@ -66,6 +66,12 @@ def read_csv_and_send_data(csv_file_path, company_name):
                 "observations": observations.strip()
             }
 
+
+            if code:
+                data_object["code"] = code.strip()
+            else:
+                data_object["code"] = "No tiene",
+
             if units:
                 data_object["units"] = int(units.strip().replace(',', ''))
 
