@@ -1,4 +1,4 @@
-package useCase
+package controller
 
 import (
 	"github.com/gin-gonic/gin"
@@ -12,8 +12,7 @@ type GetMovementsByCompany struct {
 	MovementRepository repository.MovementRepositoryInterface
 }
 
-func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
-
+func (repository GetMovementsByCompany) GetAll(ctx *gin.Context) {
 	id := ctx.Param("id")
 	page := ctx.Query("page")
 	pageSize := ctx.Query("page_size")
@@ -21,7 +20,7 @@ func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
 	//nameFilter := ctx.Query("name")
 	//brandFilter := ctx.Query("brand")
 	orderBy := ctx.Query("order_by")
-	whatOrder := ctx.Query("what_order")
+	orderDirection := ctx.Query("direction")
 
 	limit, offset, err := repository.getOffset(page, pageSize)
 
@@ -40,7 +39,7 @@ func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
 
 	filter := ""
 
-	movementsResult, err := repository.MovementRepository.GetMovementsByCompanyId(parsedId, limit, offset, filter, orderBy, whatOrder)
+	movementsResult, err := repository.MovementRepository.GetMovementsByCompanyId(parsedId, limit, offset, filter, orderBy, orderDirection)
 	if err != nil {
 		status, errMessage := errors.HandleError(err)
 		ctx.JSON(status, errMessage)
@@ -65,7 +64,6 @@ func (repository GetMovementsByCompany) validateId(id string) (int, error) {
 }
 
 func (repository GetMovementsByCompany) getOffset(page string, pageSize string) (int, int, error) {
-
 	if page == "" || page == "0" {
 		page = "1"
 	}

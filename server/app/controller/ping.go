@@ -1,4 +1,4 @@
-package useCase
+package controller
 
 import (
 	"net/http"

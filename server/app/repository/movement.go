@@ -12,7 +12,7 @@ type MovementRepositoryInterface interface {
 	CreateMovement(movement types.Movement, productId *int64) error
 }
 
-func (repository Repository) GetMovementsByCompanyId(id int, limit int, offset int, filter string, orderBy string, whatOrder string) (types.MovementsResponse, error) {
+func (repository Repository) GetMovementsByCompanyId(id int, limit int, offset int, filter string, orderBy string, orderDirection string) (types.MovementsResponse, error) {
 	var response = types.MovementsResponse{}
 
 	company, err := repository.getCompanyById(id)
@@ -23,32 +23,30 @@ func (repository Repository) GetMovementsByCompanyId(id int, limit int, offset i
 	response.CompanyName = company.Name
 
 	values := []interface{}{id, limit, offset}
+
 	if filter != "" {
 		strings.ToLower(filter)
 		values = append(values, filter)
 	}
 
-	//if orderBy == "" {
-	//	orderBy = "id"
-	//}
-	//
-	//strings.ToLower(orderBy)
-	//values = append(values, orderBy)
-	//
-	//if whatOrder == "" {
-	//	whatOrder = "ASC"
-	//}
-	//
-	//strings.ToUpper(whatOrder)
-	//values = append(values, whatOrder)
+	if orderBy == "" {
+		orderBy = "id"
+	}
+	strings.ToLower(orderBy)
 
-	fmt.Println("TU PUTA MADRE", values)
+	if orderDirection == "" {
+		orderDirection = "ASC"
+	}
+	strings.ToUpper(orderDirection)
+
+	var order = fmt.Sprintf("%s %s", orderBy, orderDirection)
+
 	query := "SELECT product.*, movement.* FROM company"
 	query += " INNER JOIN product ON product.company_id = company.id"
 	query += " INNER JOIN movements_products ON movements_products.product_id = product.id"
 	query += " INNER JOIN movement ON movement.id = movements_products.movement_id"
 	query += " WHERE company.id = ?"
-	query += " ORDER BY ? ?"
+	query += " ORDER BY movement." + order
 	query += " LIMIT ? OFFSET ?"
 
 	movementsRow, err := repository.Db.Query(query, values...)
