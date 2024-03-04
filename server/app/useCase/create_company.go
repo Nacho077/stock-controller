@@ -1,4 +1,4 @@
-package controller
+package useCase
 
 import (
 	"github.com/stock-controller/app/repository"

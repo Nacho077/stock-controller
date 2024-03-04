@@ -8,7 +8,7 @@ import (
 )
 
 type MovementRepositoryInterface interface {
-	GetMovementsByCompanyId(id int, limit int, offset int, filter string, orderBy string, whatOrder string) (types.MovementsResponse, error)
+	GetMovementsByCompanyId(id int, limit int, offset int, filter string, orderBy string, orderDirection string) (types.MovementsResponse, error)
 	CreateMovement(movement types.Movement, productId *int64) error
 }
 

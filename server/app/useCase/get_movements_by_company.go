@@ -1,4 +1,4 @@
-package controller
+package useCase
 
 import (
 	"github.com/gin-gonic/gin"
@@ -12,7 +12,7 @@ type GetMovementsByCompany struct {
 	MovementRepository repository.MovementRepositoryInterface
 }
 
-func (repository GetMovementsByCompany) GetAll(ctx *gin.Context) {
+func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
 	id := ctx.Param("id")
 	page := ctx.Query("page")
 	pageSize := ctx.Query("page_size")

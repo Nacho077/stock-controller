@@ -1,4 +1,4 @@
-package controller
+package useCase
 
 import (
 	"github.com/gin-gonic/gin"

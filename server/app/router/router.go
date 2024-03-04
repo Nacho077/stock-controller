@@ -3,18 +3,18 @@ package router
 import (
 	"database/sql"
 	"github.com/gin-gonic/gin"
-	"github.com/stock-controller/app/controller"
 	"github.com/stock-controller/app/repository"
+	"github.com/stock-controller/app/useCase"
 )
 
 func GetRouter(app *gin.Engine, db *sql.DB) {
 	generalRepository := repository.Repository{Db: db}
 
-	NewCompany := controller.GetCompanies{CompanyRepository: generalRepository}
-	NewMovementsByCompany := controller.GetMovementsByCompany{MovementRepository: generalRepository}
-	NewBulkCreate := controller.BulkCreate{BulkCreateRepository: generalRepository}
+	NewCompany := useCase.GetCompanies{CompanyRepository: generalRepository}
+	NewMovementsByCompany := useCase.GetMovementsByCompany{MovementRepository: generalRepository}
+	NewBulkCreate := useCase.BulkCreate{BulkCreateRepository: generalRepository}
 
-	app.GET("/ping", controller.PingController)
+	app.GET("/ping", useCase.PingController)
 
 	app.POST("/bulk-create", NewBulkCreate.Handle)
 
