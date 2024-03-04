@@ -41,7 +41,7 @@ func (Repository Repository) getCompanyById(id int) (types.Company, error) {
 		return company, errors.NewFailedDependencyError(fmt.Sprintf("Error in database when bringing company with id %d", id), err.Error())
 	}
 
-	if company.Id == 0 {
+	if company.Id == nil {
 		return company, errors.NewBadRequestError(fmt.Sprintf("Company with id %d doesn't exist", id), "User error")
 	}
 
@@ -71,16 +71,3 @@ func (repository Repository) GetCompanyIdByName(name string) (int64, error) {
 
 	return companyId, nil
 }
-
-//func (repository Repository) CreateCompany(name string) (*string, error) {
-//	companyId, err := repository.CreateCompanyIfNotExist(name)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	if companyId == 0 {
-//		//ERROR
-//	}
-//
-//	return
-//}
