@@ -20,7 +20,7 @@ func GetRouter(app *gin.Engine, db *sql.DB) {
 
 	companyRoutes := app.Group("/company")
 	companyRoutes.GET("/", NewCompany.Handle)
-	companyRoutes.GET("/:id/movements", NewMovementsByCompany.GetAll)
+	companyRoutes.GET("/:id/movements", NewMovementsByCompany.Handle)
 	companyRoutes.POST("/", NewCompany.Handle)
 
 	//productRoutes := app.Group("/product")
