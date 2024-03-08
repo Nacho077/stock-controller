@@ -11,6 +11,7 @@ func GetRouter(app *gin.Engine, db *sql.DB) {
 	generalRepository := repository.Repository{Db: db}
 
 	NewCompany := useCase.GetCompanies{CompanyRepository: generalRepository}
+	postCompany := useCase.CreateCompany{CompanyRepository: generalRepository}
 	NewMovementsByCompany := useCase.GetMovementsByCompany{MovementRepository: generalRepository}
 	NewBulkCreate := useCase.BulkCreate{BulkCreateRepository: generalRepository}
 
@@ -21,7 +22,7 @@ func GetRouter(app *gin.Engine, db *sql.DB) {
 	companyRoutes := app.Group("/company")
 	companyRoutes.GET("/", NewCompany.Handle)
 	companyRoutes.GET("/:id/movements", NewMovementsByCompany.Handle)
-	companyRoutes.POST("/", NewCompany.Handle)
+	companyRoutes.POST("/", postCompany.Handle)
 
 	//productRoutes := app.Group("/product")
 	//productRoutes.POST("/", NewCompany.Handle)

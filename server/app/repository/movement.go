@@ -4,48 +4,74 @@ import (
 	"fmt"
 	"github.com/stock-controller/app/errors"
 	"github.com/stock-controller/app/types"
+	"strings"
 )
 
 type MovementRepositoryInterface interface {
-	GetMovementsByCompanyId(id int) ([]types.ProductMovement, error)
+	GetMovementsByCompanyId(id int, limit int, offset int, filter string, orderBy string, orderDirection string) (types.MovementsResponse, error)
 	CreateMovement(movement types.Movement, productId *int64) error
 }
 
-func (repository Repository) GetMovementsByCompanyId(id int) ([]types.ProductMovement, error) {
-	var company types.Company
+func (repository Repository) GetMovementsByCompanyId(id int, limit int, offset int, filter string, orderBy string, orderDirection string) (types.MovementsResponse, error) {
+	var response = types.MovementsResponse{}
 
-	err := repository.Db.QueryRow("SELECT * FROM company WHERE company.id = ?", id).Scan(&company.Id, &company.Name)
+	company, err := repository.getCompanyById(id)
 	if err != nil {
-		errors.NewFailedDependencyError(fmt.Sprintf("Error in database when bringing company with id %d", id), err.Error())
+		return response, err
 	}
 
-	if company.Id == 0 {
-		return nil, errors.NewBadRequestError(fmt.Sprintf("Company with id %d doesn't exist", id), "User error")
+	response.CompanyName = company.Name
+
+	values := []interface{}{id, limit, offset}
+
+	if filter != "" {
+		strings.ToLower(filter)
+		values = append(values, filter)
 	}
+
+	if orderBy == "" {
+		orderBy = "id"
+	}
+	strings.ToLower(orderBy)
+
+	if orderDirection == "" {
+		orderDirection = "ASC"
+	}
+	strings.ToUpper(orderDirection)
+
+	var order = fmt.Sprintf("%s %s", orderBy, orderDirection)
 
 	query := "SELECT product.*, movement.* FROM company"
 	query += " INNER JOIN product ON product.company_id = company.id"
 	query += " INNER JOIN movements_products ON movements_products.product_id = product.id"
 	query += " INNER JOIN movement ON movement.id = movements_products.movement_id"
 	query += " WHERE company.id = ?"
+	query += " ORDER BY movement." + order
+	query += " LIMIT ? OFFSET ?"
 
-	movementsRow, err := repository.Db.Query(query, id)
+	movementsRow, err := repository.Db.Query(query, values...)
 	if err != nil {
-		errors.NewFailedDependencyError("Error in database when bringing movements and related products", err.Error())
+		return response, errors.NewFailedDependencyError("Error in database when bringing movements and related products", err.Error())
 	}
 
 	movements := make([]types.ProductMovement, 0)
 	var movement types.ProductMovement
 
+	if movementsRow == nil {
+		return response, nil
+	}
+
 	for movementsRow.Next() {
 		err = movementsRow.Scan(&movement.ProductId, &movement.Code, &movement.Name, &movement.Brand, &movement.Detail, &movement.CompanyId, &movement.MovementId, &movement.Date, &movement.ShippingCode, &movement.Units, &movement.Deposit, &movement.Observations)
 		if err != nil {
-			return nil, errors.NewInternalServerError("Error in scan when converting movement", err.Error())
+			return response, errors.NewInternalServerError("Error in scan when converting movement", err.Error())
 		}
 		movements = append(movements, movement)
 	}
 
-	return movements, nil
+	response.Movements = movements
+
+	return response, nil
 }
 
 func (repository Repository) CreateMovement(movement types.Movement, productId *int64) error {
