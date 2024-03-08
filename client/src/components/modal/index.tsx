@@ -1,4 +1,4 @@
-import { ModalInfo } from '../../interfaces/interfaces'
+import { ModalInfo } from './interfaces'
 import styles from './modal.module.scss'
 
 const Modal: React.FC<ModalInfo> = ({data: {text, buttons}, onClose}) => {

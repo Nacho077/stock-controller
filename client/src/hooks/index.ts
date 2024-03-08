@@ -1,7 +1,11 @@
-import useAppDispatch from "./useAppDispatch"
-import useAppSelector from "./useAppSelector"
+import useAppDispatch from './useAppDispatch'
+import useAppSelector from './useAppSelector'
+import { useGetCompanies, useGetProductsMovementsByCompanyId, useCreateNewMovement } from './apiHooks'
 
 export {
     useAppDispatch,
-    useAppSelector
+    useAppSelector,
+    useGetCompanies,
+    useGetProductsMovementsByCompanyId,
+    useCreateNewMovement
 }

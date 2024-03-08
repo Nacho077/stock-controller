@@ -3,14 +3,18 @@
     border: 1px solid transparent;
     padding: 0.6em 1.2em;
     font-size: 1em;
-    font-weight: 500;
     font-family: inherit;
-    background-color: $primaryColor;
+    background-color: $buttonColor;
+    color: $secondaryColor;
     cursor: pointer;
     transition: border-color 0.25s;
+    box-shadow: 0 0 5px $buttonColor;
+    transition: transform 0.5s;
+    text-transform: capitalize;
+    font-weight: 500;
 
     &:hover {
-        border-color: $buttonColor;
+        transform: scale(1.1);
     }
 
     &button:hover 
@@ -20,11 +24,17 @@
     }
 }
 
-@mixin flex($direction: row, $align:center, $justify:center) {
+@mixin secondaryButton {
+    @include button();
+    color: $buttonColor;
+    background-color: $secondaryColor;
+}
+
+@mixin flex($direction: row, $align:center, $justify:center, $wrap:wrap) {
     display: flex;
     flex-direction: $direction;
     align-items: $align;
     justify-content: $justify;
-    flex-wrap: wrap;
+    flex-wrap: $wrap;
 }
   

@@ -1,0 +1,17 @@
+.container {
+    width: 100%;
+    background-color: $buttonColor;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    img {
+        padding-left: 40px;
+        padding-top: 3%;
+        height: 40px;
+        cursor: pointer;
+    }
+
+    h1 {
+        margin: 0;
+    }
+}
