@@ -17,7 +17,7 @@ const Movements: React.FC = () => {
     const createNewMovement = useCreateNewMovement()
     
     const autoCompleteFields = <T extends ProductFilters | ProductMovement>(state: T, codeToFind: string): T => {
-        const movement = rows.find(row => row.code == codeToFind)
+        const movement = rows.find(row => row.code?.toLowerCase() == codeToFind?.toLowerCase())
 
         return {
             ...state,

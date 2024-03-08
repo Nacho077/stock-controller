@@ -3,7 +3,7 @@ import { FormFields } from '../../components/form/interfaces';
 import { Header, Row } from '../../components/table/interfaces';
 
 export interface ProductMovement extends Row {
-    movementId: number
+  movementId: number
 	date: string
 	shippingCode: string
 	units: number
