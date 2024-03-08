@@ -3,7 +3,7 @@ import { ChangeEvent, FormEvent } from "react"
 export interface Button {
     title: string
     type?: "submit" | "reset" | "button"
-    onClick?: any
+    onClick?: () => void
 }
 
 export interface FormFields {

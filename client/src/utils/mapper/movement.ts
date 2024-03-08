@@ -1,6 +1,6 @@
 import { ProductMovement } from "../../views/movements/interfaces"
 
-const productMovementToMovementTable = (movement: any) => {
+const productMovementToMovementTable = (movement: any): ProductMovement => {
     return {
         id: movement.movement_id,
         movementId: movement.movement_id,

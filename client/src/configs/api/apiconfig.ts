@@ -18,7 +18,7 @@ export const api = createApi({
             }
         }),
         getProductsMovementsByCompanyId: builder.query({
-            query: (companyId: number) => ({url: `/company/${companyId}/movements`}),
+            query: (companyId: number) => ({url: `/company/${companyId}/movements?page_size=20`}),
             async onQueryStarted({}, {dispatch, queryFulfilled}) {
                 try {
                     const result = await queryFulfilled

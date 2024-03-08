@@ -46,12 +46,14 @@ const Form = <T extends Record<string, string | number>>({
             ))}
         </div>
         <div className={styles.containerButtons}>
-            {buttons.map(({title, type="button", onClick=() => {}}) => <button
+            {buttons.map(({title, type="button", onClick=() => {}}) => 
+              <button
                 key={title}
                 className={styles[type]}
                 type={type}
                 onClick={onClick}
-            >{title}</button>)}
+              >{title}</button>
+            )}
         </div>
     </form>
 }

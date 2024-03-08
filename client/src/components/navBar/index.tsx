@@ -29,7 +29,6 @@ const NavBar: React.FC = () => {
         <nav className={styles.container}>
             <img src={GoBackIcon} onClick={() => navigate(-1)} alt="back"/>
             <h1>{title}</h1>
-            <span></span>
         </nav>
     )
 }
