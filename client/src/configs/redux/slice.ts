@@ -5,11 +5,13 @@ import { ProductMovement } from '../../views/movements/interfaces.ts'
 interface InitialState {
     error: string
     movements: ProductMovement[],
+    actualCompany: string,
 }
 
 const initialState: InitialState = {
     error: '',
-    movements: []
+    movements: [],
+    actualCompany: 'Movements'
 }
 
 const slice = createSlice({
@@ -23,6 +25,9 @@ const slice = createSlice({
         deleteError: (state) => {
             state.error = ''
         },
+        setActualCompany: (state, action: PayloadAction<string>) => {
+          state.actualCompany = action.payload
+        },
         setInitialMovements: (state, action: PayloadAction<ProductMovement[]>) => {
             state.movements = action.payload
         },
@@ -32,6 +37,6 @@ const slice = createSlice({
     }
 })
 
-export const { setError, deleteError, setInitialMovements, addMovement } = slice.actions
+export const { setError, deleteError, setActualCompany, setInitialMovements, addMovement } = slice.actions
 
 export default slice.reducer

@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { setInitialMovements, setError, addMovement } from '../redux/slice'
+import { setInitialMovements, setError, setActualCompany, addMovement } from '../redux/slice'
 import { ApiError } from './apiError'
 import { productMovementArrToMovementTable } from '../../utils/mapper/movement'
 import { ProductMovement } from '../../views/movements/interfaces'
@@ -22,7 +22,8 @@ export const api = createApi({
             async onQueryStarted({}, {dispatch, queryFulfilled}) {
                 try {
                     const result = await queryFulfilled
-                    const mappedData = productMovementArrToMovementTable(result.data)
+                    const mappedData = productMovementArrToMovementTable(result.data.movements)
+                    dispatch(setActualCompany(result.data["company_name"]))
                     dispatch(setInitialMovements(mappedData))
                 } catch (err: any) {
                     dispatch(setError(err.error as ApiError))
