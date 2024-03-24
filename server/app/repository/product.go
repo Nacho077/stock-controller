@@ -6,33 +6,33 @@ import (
 	"github.com/stock-controller/app/types"
 )
 
-type CreateProductRepositoryInterface interface {
+type ProductRepositoryInterface interface {
 	CreateProduct(productToCreate types.Product) (*int64, error)
-	CreateProductIfNotExist(productToCreate types.Product) (*int64, error)
+	CreateProductIfNotExist(productToCreate types.Product) (*int64, bool, error)
 	GetProducts(product types.Product) ([]types.Product, error)
 }
 
-func (repository Repository) CreateProductIfNotExist(product types.Product) (*int64, error) {
+func (repository Repository) CreateProductIfNotExist(product types.Product) (*int64, bool, error) {
 
 	productFound, err := repository.GetProducts(product)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	if len(productFound) > 1 {
-		return nil, errors.NewBadRequestError("There is not enough information to know if the product exists", "User Error")
+		return nil, false, errors.NewBadRequestError("There is not enough information to know if the product exists", "User Error")
 	}
 
 	if len(productFound) == 1 {
-		return productFound[0].Id, nil
+		return productFound[0].Id, true, nil
 	}
 
 	createdProductId, err := repository.CreateProduct(product)
 	if err != nil {
-		return createdProductId, err
+		return createdProductId, false, err
 	}
 
-	return createdProductId, nil
+	return createdProductId, false, nil
 }
 
 func (repository Repository) CreateProduct(product types.Product) (*int64, error) {

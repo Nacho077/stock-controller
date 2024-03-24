@@ -34,7 +34,7 @@ func (repository Repository) BulkCreateData(dataToSave types.DataToSave) error {
 		} else {
 			newProduct := types.Product{Name: &data.Name, Code: data.Code, Brand: &data.Brand, Detail: &data.Detail, CompanyId: companyId}
 
-			productId, err = repository.CreateProductIfNotExist(newProduct)
+			productId, _, err = repository.CreateProductIfNotExist(newProduct)
 			if err != nil {
 				return err
 			}

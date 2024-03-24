@@ -10,19 +10,18 @@ import (
 )
 
 type CreateCompany struct {
-	CompanyRepository repository.CompaniesRepositoryInterface
+	CompanyRepository repository.CompanyRepositoryInterface
 }
 
 func (repository CreateCompany) Handle(ctx *gin.Context) {
-	var requestBody types.Company
-	var companyIdCreated types.CompanyIdCreated
+	var company types.Company
 
-	err := ctx.BindJSON(&requestBody)
+	err := ctx.BindJSON(&company)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return
 	}
-	name := requestBody.Name
+	name := company.Name
 
 	if err = isNameValid(name); err != nil {
 		ctx.JSON(errors.HandleError(err))
@@ -39,13 +38,13 @@ func (repository CreateCompany) Handle(ctx *gin.Context) {
 		ctx.JSON(errors.HandleError(errors.NewBadRequestError("Company already exists", "User Error")))
 		return
 	}
-	companyIdCreated.Id = companyId
+	company.Id = &companyId
 
-	ctx.JSON(http.StatusOK, companyIdCreated)
+	ctx.JSON(http.StatusOK, company)
 }
 
 func isNameValid(name string) error {
-	matched, _ := regexp.MatchString("^[0-9]+$", name)
+	matched, _ := regexp.MatchString("[0-9]+", name)
 	if matched || name == "" {
 		return errors.NewBadRequestError("Company name is not valid", "User Error")
 	}

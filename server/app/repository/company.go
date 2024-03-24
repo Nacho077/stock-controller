@@ -6,7 +6,7 @@ import (
 	"github.com/stock-controller/app/types"
 )
 
-type CompaniesRepositoryInterface interface {
+type CompanyRepositoryInterface interface {
 	GetCompanies() ([]types.Company, error)
 	getCompanyById(id int) (types.Company, error)
 	GetCompanyIdByName(name string) (int64, error)
@@ -33,9 +33,9 @@ func (repository Repository) GetCompanies() ([]types.Company, error) {
 	return companies, nil
 }
 
-func (Repository Repository) getCompanyById(id int) (types.Company, error) {
+func (repository Repository) getCompanyById(id int) (types.Company, error) {
 	var company types.Company
-	err := Repository.Db.QueryRow("SELECT * FROM company WHERE company.id = ?", id).Scan(&company.Id, &company.Name)
+	err := repository.Db.QueryRow("SELECT * FROM company WHERE company.id = ?", id).Scan(&company.Id, &company.Name)
 
 	if err != nil {
 		return company, errors.NewFailedDependencyError(fmt.Sprintf("Error in database when bringing company with id %d", id), err.Error())

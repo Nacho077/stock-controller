@@ -10,21 +10,25 @@ import (
 func GetRouter(app *gin.Engine, db *sql.DB) {
 	generalRepository := repository.Repository{Db: db}
 
-	NewCompany := useCase.GetCompanies{CompanyRepository: generalRepository}
-	postCompany := useCase.CreateCompany{CompanyRepository: generalRepository}
-	NewMovementsByCompany := useCase.GetMovementsByCompany{MovementRepository: generalRepository}
-	NewBulkCreate := useCase.BulkCreate{BulkCreateRepository: generalRepository}
+	bulkCreate := useCase.BulkCreate{BulkCreateRepository: generalRepository}
+
+	getCompanies := useCase.GetCompanies{CompanyRepository: generalRepository}
+	createCompany := useCase.CreateCompany{CompanyRepository: generalRepository}
+	getMovementsByCompany := useCase.GetMovementsByCompany{MovementRepository: generalRepository}
+
+	//getProducts := useCase.GetProducts{ProductRepository: generalRepository}
+	createProduct := useCase.CreateProduct{ProductRepository: generalRepository}
 
 	app.GET("/ping", useCase.PingController)
 
-	app.POST("/bulk-create", NewBulkCreate.Handle)
+	app.POST("/bulk-create", bulkCreate.Handle)
 
 	companyRoutes := app.Group("/company")
-	companyRoutes.GET("/", NewCompany.Handle)
-	companyRoutes.GET("/:id/movements", NewMovementsByCompany.Handle)
-	companyRoutes.POST("/", postCompany.Handle)
+	companyRoutes.GET("/", getCompanies.Handle)
+	companyRoutes.GET("/:id/movements", getMovementsByCompany.Handle)
+	companyRoutes.POST("/", createCompany.Handle)
 
-	//productRoutes := app.Group("/product")
-	//productRoutes.POST("/", NewCompany.Handle)
+	productRoutes := app.Group("/product")
+	productRoutes.POST("/", createProduct.Handle)
 
 }
