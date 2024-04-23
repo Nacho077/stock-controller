@@ -13,7 +13,7 @@ type GetMovementsByCompany struct {
 }
 
 func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
-	id := ctx.Param("id")
+	id := ctx.Param("companyId")
 	page := ctx.Query("page")
 	pageSize := ctx.Query("page_size")
 	//codeFilter := ctx.Query("code")

@@ -10,6 +10,7 @@ import (
 type MovementRepositoryInterface interface {
 	GetMovementsByCompanyId(id int, limit int, offset int, filter string, orderBy string, orderDirection string) (types.MovementsResponse, error)
 	CreateMovement(movement types.Movement, productId *int64) error
+	DeleteMovementById(id int64) error
 }
 
 func (repository Repository) GetMovementsByCompanyId(id int, limit int, offset int, filter string, orderBy string, orderDirection string) (types.MovementsResponse, error) {
@@ -75,8 +76,6 @@ func (repository Repository) GetMovementsByCompanyId(id int, limit int, offset i
 }
 
 func (repository Repository) CreateMovement(movement types.Movement, productId *int64) error {
-	// Create new movement
-
 	if productId == nil {
 		return errors.NewInternalServerError("Error in Movement when trying to get product id", "Internal Error")
 	}
@@ -112,4 +111,19 @@ func (repository Repository) CreateMovement(movement types.Movement, productId *
 	}
 
 	return nil
+}
+
+func (repository Repository) DeleteMovementById(id int64) error {
+	_, err := repository.Db.Exec("DELETE FROM movements_products WHERE movement_id = ?", id)
+	if err != nil {
+		return errors.NewFailedDependencyError("Error when trying to delete relation between movement and product", err.Error())
+	}
+
+	_, err = repository.Db.Exec("DELETE FROM movement WHERE id = ?", id)
+	if err != nil {
+		return errors.NewFailedDependencyError("Error when trying to delete movement", err.Error())
+	}
+
+	return nil
+
 }
