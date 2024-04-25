@@ -10,6 +10,7 @@ type ProductRepositoryInterface interface {
 	CreateProduct(productToCreate types.Product) (*int64, error)
 	CreateProductIfNotExist(productToCreate types.Product) (*int64, bool, error)
 	GetProducts(product types.Product) ([]types.Product, error)
+	DeleteProductById(id int64) error
 }
 
 func (repository Repository) CreateProductIfNotExist(product types.Product) (*int64, bool, error) {
@@ -122,4 +123,13 @@ func (repository Repository) GetProducts(product types.Product) ([]types.Product
 	}
 
 	return productsFound, nil
+}
+
+func (repository Repository) DeleteProductById(id int64) error {
+	_, err := repository.Db.Exec("DELETE FROM product WHERE id = ?", id)
+	if err != nil {
+		return errors.NewFailedDependencyError("Error in deleting product", err.Error())
+	}
+
+	return nil
 }

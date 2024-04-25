@@ -11,7 +11,7 @@ type CompanyRepositoryInterface interface {
 	getCompanyById(id int) (types.Company, error)
 	GetCompanyIdByName(name string) (int64, error)
 	CreateCompanyIfNotExist(name string) (int64, error)
-	//CreateCompany(name string) (int64, error)
+	DeleteCompanyById(id int64) error
 }
 
 func (repository Repository) GetCompanies() ([]types.Company, error) {
@@ -70,4 +70,13 @@ func (repository Repository) GetCompanyIdByName(name string) (int64, error) {
 	}
 
 	return companyId, nil
+}
+
+func (repository Repository) DeleteCompanyById(id int64) error {
+	_, err := repository.Db.Exec("DELETE FROM company WHERE id = ?", id)
+	if err != nil {
+		return errors.NewFailedDependencyError("Error in delete company", err.Error())
+	}
+
+	return nil
 }
