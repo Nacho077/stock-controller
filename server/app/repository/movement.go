@@ -9,7 +9,9 @@ import (
 
 type MovementRepositoryInterface interface {
 	GetMovementsByCompanyId(id int, limit int, offset int, filter string, orderBy string, orderDirection string) (types.MovementsResponse, error)
+	GetMovementById(id int64) (types.Movement, error)
 	CreateMovement(movement types.Movement, productId *int64) error
+	UpdateMovementById(movement types.Movement) error
 	DeleteMovementById(id int64) error
 }
 
@@ -75,6 +77,17 @@ func (repository Repository) GetMovementsByCompanyId(id int, limit int, offset i
 	return response, nil
 }
 
+func (repository Repository) GetMovementById(id int64) (types.Movement, error) {
+	var movement types.Movement
+
+	err := repository.Db.QueryRow("SELECT * FROM movement WHERE id = ?", id).Scan(&movement.Id, &movement.Date, &movement.ShippingCode, &movement.Units, &movement.Deposit, &movement.Observations)
+	if err != nil {
+		return movement, errors.NewFailedDependencyError("Error in get movement by id", err.Error())
+	}
+
+	return movement, nil
+}
+
 func (repository Repository) CreateMovement(movement types.Movement, productId *int64) error {
 	if productId == nil {
 		return errors.NewInternalServerError("Error in Movement when trying to get product id", "Internal Error")
@@ -108,6 +121,62 @@ func (repository Repository) CreateMovement(movement types.Movement, productId *
 	// Create relation between products and movements
 	if _, err = repository.Db.Exec("INSERT INTO movements_products(movement_id, product_id) VALUES (?, ?)", movementId, productId); err != nil {
 		return errors.NewFailedDependencyError("Error when trying to save movements_products", err.Error())
+	}
+
+	return nil
+}
+
+func (repository Repository) UpdateMovementById(movement types.Movement) error {
+	var values []interface{}
+	var keys string
+
+	if movement.Date != "" {
+		values = append(values, movement.Date)
+		keys += "date = ?"
+	}
+
+	if movement.ShippingCode != nil {
+		values = append(values, movement.ShippingCode)
+		if len(keys) > 1 {
+			keys += ", "
+		}
+
+		keys += "shipping_code = ?"
+	}
+
+	if movement.Units != 0 {
+		values = append(values, movement.Units)
+		if len(keys) > 1 {
+			keys += ", "
+		}
+
+		keys += "units = ?"
+	}
+
+	if movement.Deposit != nil {
+		values = append(values, movement.Deposit)
+		if len(keys) > 1 {
+			keys += ", "
+		}
+
+		keys += "deposit = ?"
+	}
+
+	if movement.Observations != nil {
+		values = append(values, movement.Observations)
+		if len(keys) > 1 {
+			keys += ", "
+		}
+
+		keys += "observations = ?"
+	}
+
+	query := fmt.Sprintf("UPDATE movement SET %s WHERE id = ?", keys)
+	values = append(values, movement.Id)
+
+	_, err := repository.Db.Exec(query, values...)
+	if err != nil {
+		return errors.NewFailedDependencyError("Error in update movement by id", err.Error())
 	}
 
 	return nil
