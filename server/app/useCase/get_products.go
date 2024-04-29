@@ -9,21 +9,18 @@ import (
 	"strconv"
 )
 
-// getProducts -> class productsController
 type GetProducts struct {
-	// @Autowired lo de abajo
 	ProductRepository repository.ProductRepositoryInterface
 }
 
-// Función de controller.
-func (this GetProducts) Handle(ctx *gin.Context) {
+func (u GetProducts) Handle(ctx *gin.Context) {
 	companyId, err := strconv.ParseInt(ctx.Param("companyId"), 10, 64)
 	if err != nil {
 		ctx.JSON(errors.HandleError(errors.NewBadRequestError("invalid param company id", "User Error")))
 		return
 	}
 
-	products, err := this.ProductRepository.GetProducts(types.Product{CompanyId: companyId})
+	products, err := u.ProductRepository.GetProducts(types.Product{CompanyId: companyId})
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return

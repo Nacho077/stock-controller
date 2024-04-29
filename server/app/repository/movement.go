@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"github.com/stock-controller/app/errors"
 	"github.com/stock-controller/app/types"
 )
@@ -68,23 +67,8 @@ func (repository Repository) CreateMovement(movement types.Movement, productId *
 		return errors.NewInternalServerError("Error in Movement when trying to get product id", "Internal Error")
 	}
 
-	emptyValues := "?, ?, ?"
-	nameValues := "date, shipping_code, units"
-	values := []interface{}{movement.Date, movement.ShippingCode, movement.Units}
-
-	if movement.Deposit != nil && *movement.Deposit != "" {
-		emptyValues += ", ?"
-		nameValues += ", deposit"
-		values = append(values, movement.Deposit)
-	}
-
-	if movement.Observations != nil && *movement.Observations != "" {
-		emptyValues += ", ?"
-		nameValues += ", observations"
-		values = append(values, movement.Observations)
-	}
-
-	query := fmt.Sprintf("INSERT INTO movement(%s) VALUES (%s)", nameValues, emptyValues)
+	createMovementQuery := types.CreateMovementQuery{Movement: movement}
+	query, values := createMovementQuery.GetQuery()
 
 	result, err := repository.Db.Exec(query, values...)
 
@@ -102,52 +86,8 @@ func (repository Repository) CreateMovement(movement types.Movement, productId *
 }
 
 func (repository Repository) UpdateMovementById(movement types.Movement) error {
-	var values []interface{}
-	var keys string
-
-	if movement.Date != "" {
-		values = append(values, movement.Date)
-		keys += "date = ?"
-	}
-
-	if movement.ShippingCode != nil {
-		values = append(values, movement.ShippingCode)
-		if len(keys) > 1 {
-			keys += ", "
-		}
-
-		keys += "shipping_code = ?"
-	}
-
-	if movement.Units != 0 {
-		values = append(values, movement.Units)
-		if len(keys) > 1 {
-			keys += ", "
-		}
-
-		keys += "units = ?"
-	}
-
-	if movement.Deposit != nil {
-		values = append(values, movement.Deposit)
-		if len(keys) > 1 {
-			keys += ", "
-		}
-
-		keys += "deposit = ?"
-	}
-
-	if movement.Observations != nil {
-		values = append(values, movement.Observations)
-		if len(keys) > 1 {
-			keys += ", "
-		}
-
-		keys += "observations = ?"
-	}
-
-	query := fmt.Sprintf("UPDATE movement SET %s WHERE id = ?", keys)
-	values = append(values, movement.Id)
+	updateMovementQuery := types.UpdateMovementQuery{Movement: movement}
+	query, values := updateMovementQuery.GetQuery()
 
 	_, err := repository.Db.Exec(query, values...)
 	if err != nil {
