@@ -15,8 +15,8 @@ type ProductRepositoryInterface interface {
 }
 
 func (repository Repository) GetProducts(product types.Product) ([]types.Product, error) {
-	productsQuery := types.GetProductsQuery{Product: product}
-	query, values := productsQuery.GetQuery()
+	productQueries := types.ProductQueries{Product: product}
+	query, values := productQueries.GetQuery()
 
 	rows, err := repository.Db.Query(query, values...)
 	if err != nil {
@@ -75,8 +75,8 @@ func (repository Repository) CreateProductIfNotExist(product types.Product) (*in
 }
 
 func (repository Repository) CreateProduct(product types.Product) (*int64, error) {
-	CreateProductQuery := types.CreateProductQuery{Product: product}
-	query, values := CreateProductQuery.GetQuery()
+	productQueries := types.ProductQueries{Product: product}
+	query, values := productQueries.CreateQuery()
 
 	result, err := repository.Db.Exec(query, values...)
 	if err != nil {
@@ -93,8 +93,8 @@ func (repository Repository) UpdateProductById(product types.Product) error {
 		return errors.NewBadRequestError("Field code is required", "User Error")
 	}
 
-	updateProductQuery := types.UpdateProductQuery{Product: product}
-	query, values := updateProductQuery.GetQuery()
+	productQueries := types.ProductQueries{Product: product}
+	query, values := productQueries.UpdateQuery()
 
 	_, err := repository.Db.Exec(query, values...)
 	if err != nil {

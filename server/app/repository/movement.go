@@ -23,7 +23,7 @@ func (repository Repository) GetMovementsByCompanyId(companyId int, pagination t
 
 	response.CompanyName = company.Name
 
-	movementQuery := types.MovementQuery{CompanyId: companyId, MovementFilters: filters, Pagination: pagination}
+	movementQuery := types.MovementQueries{CompanyId: companyId, MovementFilters: filters, Pagination: pagination}
 	query, values := movementQuery.GetQuery()
 
 	movementsRow, err := repository.Db.Query(query, values...)
@@ -67,8 +67,8 @@ func (repository Repository) CreateMovement(movement types.Movement, productId *
 		return errors.NewInternalServerError("Error in Movement when trying to get product id", "Internal Error")
 	}
 
-	createMovementQuery := types.CreateMovementQuery{Movement: movement}
-	query, values := createMovementQuery.GetQuery()
+	movementQueries := types.MovementQueries{Movement: movement}
+	query, values := movementQueries.CreateQuery()
 
 	result, err := repository.Db.Exec(query, values...)
 
@@ -86,8 +86,8 @@ func (repository Repository) CreateMovement(movement types.Movement, productId *
 }
 
 func (repository Repository) UpdateMovementById(movement types.Movement) error {
-	updateMovementQuery := types.UpdateMovementQuery{Movement: movement}
-	query, values := updateMovementQuery.GetQuery()
+	movementQueries := types.MovementQueries{Movement: movement}
+	query, values := movementQueries.UpdateQuery()
 
 	_, err := repository.Db.Exec(query, values...)
 	if err != nil {
