@@ -89,6 +89,10 @@ func (repository Repository) UpdateMovementById(movement types.Movement) error {
 	movementQueries := types.MovementQueries{Movement: movement}
 	query, values := movementQueries.UpdateQuery()
 
+	if len(values) == 1 {
+		return errors.NewBadRequestError("You must send at least one field to modify", "User Error")
+	}
+
 	_, err := repository.Db.Exec(query, values...)
 	if err != nil {
 		return errors.NewFailedDependencyError("Error in update movement by id", err.Error())

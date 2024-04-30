@@ -2,6 +2,8 @@ package types
 
 import (
 	"fmt"
+	"github.com/stock-controller/app/utils"
+	"reflect"
 	"strings"
 )
 
@@ -18,12 +20,18 @@ func (q MovementQueries) GetQuery() (string, []interface{}) {
 	if q.OrderBy == "" {
 		q.OrderBy = "id"
 	}
-	strings.ToLower(q.OrderBy)
 
-	if q.OrderDirection == "" {
-		q.OrderDirection = "ASC"
+	if q.OrderBy != "" {
+		movementStruct := reflect.TypeOf(Movement{})
+		_, exist := movementStruct.FieldByName(utils.ToCapitalize(q.OrderBy))
+		if !exist {
+			q.OrderBy = "id"
+		}
 	}
-	strings.ToUpper(q.OrderDirection)
+
+	if q.OrderDirection == "" || (q.OrderDirection != "ASC" && q.OrderDirection != "DESC") {
+		q.OrderDirection = "DESC"
+	}
 
 	var order = fmt.Sprintf("%s %s", q.OrderBy, q.OrderDirection)
 	queryFilters := " c.id = ?"
