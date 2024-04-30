@@ -22,7 +22,7 @@ func (this CreateMovement) Handle(ctx *gin.Context) {
 		return
 	}
 
-	// Coming soon validations with companyId
+	// TODO: validations with companyId
 
 	err = ctx.BindJSON(&movementWithProductId)
 	if err != nil {
