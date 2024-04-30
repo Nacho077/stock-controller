@@ -1,7 +1,6 @@
 package useCase
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/stock-controller/app/errors"
 	"github.com/stock-controller/app/repository"
@@ -25,17 +24,14 @@ func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
 	orderDirection := ctx.Query("direction")
 
 	limit, offset, err := repository.getOffset(page, pageSize)
-
-	fmt.Println("offset: ", offset, ", limit: ", limit)
-
-	pagination := types.Pagination{offset, limit, orderBy, orderDirection}
-	filters := types.MovementFilters{codeFilter, nameFilter, brandFilter}
-
 	if err != nil {
 		status, errMessage := errors.HandleError(err)
 		ctx.JSON(status, errMessage)
 		return
 	}
+
+	pagination := types.Pagination{offset, limit, orderBy, orderDirection}
+	filters := types.MovementFilters{codeFilter, nameFilter, brandFilter}
 
 	parsedId, err := repository.validateId(id)
 	if err != nil {
