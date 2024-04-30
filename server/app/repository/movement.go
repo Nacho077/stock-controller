@@ -4,53 +4,28 @@ import (
 	"fmt"
 	"github.com/stock-controller/app/errors"
 	"github.com/stock-controller/app/types"
-	"strings"
 )
 
 type MovementRepositoryInterface interface {
-	GetMovementsByCompanyId(id int, limit int, offset int, filter string, orderBy string, orderDirection string) (types.MovementsResponse, error)
+	GetMovementsByCompanyId(companyId int, pagination types.Pagination, filters types.MovementFilters) (types.MovementsResponse, error)
 	GetMovementById(id int64) (types.Movement, error)
 	CreateMovement(movement types.Movement, productId *int64) error
 	UpdateMovementById(movement types.Movement) error
 	DeleteMovementById(id int64) error
 }
 
-func (repository Repository) GetMovementsByCompanyId(id int, limit int, offset int, filter string, orderBy string, orderDirection string) (types.MovementsResponse, error) {
+func (repository Repository) GetMovementsByCompanyId(companyId int, pagination types.Pagination, filters types.MovementFilters) (types.MovementsResponse, error) {
 	var response = types.MovementsResponse{}
 
-	company, err := repository.getCompanyById(id)
+	company, err := repository.getCompanyById(companyId)
 	if err != nil {
 		return response, err
 	}
 
 	response.CompanyName = company.Name
 
-	values := []interface{}{id, limit, offset}
-
-	if filter != "" {
-		strings.ToLower(filter)
-		values = append(values, filter)
-	}
-
-	if orderBy == "" {
-		orderBy = "id"
-	}
-	strings.ToLower(orderBy)
-
-	if orderDirection == "" {
-		orderDirection = "ASC"
-	}
-	strings.ToUpper(orderDirection)
-
-	var order = fmt.Sprintf("%s %s", orderBy, orderDirection)
-
-	query := "SELECT product.*, movement.* FROM company"
-	query += " INNER JOIN product ON product.company_id = company.id"
-	query += " INNER JOIN movements_products ON movements_products.product_id = product.id"
-	query += " INNER JOIN movement ON movement.id = movements_products.movement_id"
-	query += " WHERE company.id = ?"
-	query += " ORDER BY movement." + order
-	query += " LIMIT ? OFFSET ?"
+	movementQuery := types.MovementQuery{CompanyId: companyId, MovementFilters: filters, Pagination: pagination}
+	query, values := movementQuery.GetQuery()
 
 	movementsRow, err := repository.Db.Query(query, values...)
 	if err != nil {
