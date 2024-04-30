@@ -20,13 +20,15 @@ func (this UpdateProductById) Handle(ctx *gin.Context) {
 		return
 	}
 
-	product := types.Product{Id: &productId}
+	var product types.Product
 
 	err = ctx.BindJSON(&product)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return
 	}
+
+	product.Id = &productId
 
 	err = this.ProductRepository.UpdateProductById(product)
 	if err != nil {

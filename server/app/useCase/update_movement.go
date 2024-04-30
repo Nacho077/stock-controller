@@ -20,13 +20,15 @@ func (this UpdateMovementById) Handle(ctx *gin.Context) {
 		return
 	}
 
-	movement := types.Movement{Id: &movementId}
+	var movement types.Movement
 
 	err = ctx.BindJSON(&movement)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return
 	}
+
+	movement.Id = &movementId
 
 	err = this.MovementRepository.UpdateMovementById(movement)
 	if err != nil {
