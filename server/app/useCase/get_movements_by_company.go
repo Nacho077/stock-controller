@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stock-controller/app/errors"
 	"github.com/stock-controller/app/repository"
+	"github.com/stock-controller/app/types"
 	"net/http"
 	"strconv"
 )
@@ -13,22 +14,24 @@ type GetMovementsByCompany struct {
 }
 
 func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
-	id := ctx.Param("id")
+	id := ctx.Param("companyId")
 	page := ctx.Query("page")
 	pageSize := ctx.Query("page_size")
-	//codeFilter := ctx.Query("code")
-	//nameFilter := ctx.Query("name")
-	//brandFilter := ctx.Query("brand")
+	codeFilter := ctx.Query("code")
+	nameFilter := ctx.Query("name")
+	brandFilter := ctx.Query("brand")
 	orderBy := ctx.Query("order_by")
 	orderDirection := ctx.Query("direction")
 
 	limit, offset, err := repository.getOffset(page, pageSize)
-
 	if err != nil {
 		status, errMessage := errors.HandleError(err)
 		ctx.JSON(status, errMessage)
 		return
 	}
+
+	pagination := types.Pagination{offset, limit, orderBy, orderDirection}
+	filters := types.MovementFilters{codeFilter, nameFilter, brandFilter}
 
 	parsedId, err := repository.validateId(id)
 	if err != nil {
@@ -37,9 +40,7 @@ func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
 		return
 	}
 
-	filter := ""
-
-	movementsResult, err := repository.MovementRepository.GetMovementsByCompanyId(parsedId, limit, offset, filter, orderBy, orderDirection)
+	movementsResult, err := repository.MovementRepository.GetMovementsByCompanyId(parsedId, pagination, filters)
 	if err != nil {
 		status, errMessage := errors.HandleError(err)
 		ctx.JSON(status, errMessage)

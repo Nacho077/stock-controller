@@ -8,7 +8,7 @@ import (
 )
 
 type GetCompanies struct {
-	CompanyRepository repository.CompaniesRepositoryInterface
+	CompanyRepository repository.CompanyRepositoryInterface
 }
 
 func (repository GetCompanies) Handle(ctx *gin.Context) {

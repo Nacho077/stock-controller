@@ -6,12 +6,13 @@ import (
 	"github.com/stock-controller/app/types"
 )
 
-type CompaniesRepositoryInterface interface {
+type CompanyRepositoryInterface interface {
 	GetCompanies() ([]types.Company, error)
 	getCompanyById(id int) (types.Company, error)
 	GetCompanyIdByName(name string) (int64, error)
 	CreateCompanyIfNotExist(name string) (int64, error)
-	//CreateCompany(name string) (int64, error)
+	DeleteCompanyById(id int64) error
+	UpdateCompanyById(company types.Company) error
 }
 
 func (repository Repository) GetCompanies() ([]types.Company, error) {
@@ -33,9 +34,9 @@ func (repository Repository) GetCompanies() ([]types.Company, error) {
 	return companies, nil
 }
 
-func (Repository Repository) getCompanyById(id int) (types.Company, error) {
+func (repository Repository) getCompanyById(id int) (types.Company, error) {
 	var company types.Company
-	err := Repository.Db.QueryRow("SELECT * FROM company WHERE company.id = ?", id).Scan(&company.Id, &company.Name)
+	err := repository.Db.QueryRow("SELECT * FROM company WHERE company.id = ?", id).Scan(&company.Id, &company.Name)
 
 	if err != nil {
 		return company, errors.NewFailedDependencyError(fmt.Sprintf("Error in database when bringing company with id %d", id), err.Error())
@@ -70,4 +71,22 @@ func (repository Repository) GetCompanyIdByName(name string) (int64, error) {
 	}
 
 	return companyId, nil
+}
+
+func (repository Repository) UpdateCompanyById(company types.Company) error {
+	_, err := repository.Db.Exec("UPDATE company SET name = ? WHERE id = ?", company.Name, company.Id)
+	if err != nil {
+		return errors.NewFailedDependencyError("Error in update company with name", err.Error())
+	}
+
+	return nil
+}
+
+func (repository Repository) DeleteCompanyById(id int64) error {
+	_, err := repository.Db.Exec("DELETE FROM company WHERE id = ?", id)
+	if err != nil {
+		return errors.NewFailedDependencyError("Error in delete company", err.Error())
+	}
+
+	return nil
 }
