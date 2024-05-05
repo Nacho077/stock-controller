@@ -3,24 +3,24 @@ import { FormFields } from '../../components/form/interfaces';
 import { Header, Row } from '../../components/table/interfaces';
 
 export interface ProductMovement extends Row {
-  movementId: number
-	date: string
-	shippingCode: string
-	units: number
-	deposit: string
-	observations: string
-	productId: number
-	name: string
-	code: string
-	brand: string
-	detail: string
-	companyId: number
+    movementId: number
+    date: string
+    shippingCode: string
+    units: number
+    deposit: string
+    observations: string
+    productId: number
+    name: string
+    code: string
+    brand: string
+    detail: string
+    companyId: number
 }
 
 export interface ProductFilters {
-	code: string
-	name: string
-	brand: string
+    code: string
+    name: string
+    brand: string
 }
 
 export const MovementsFiltersFields: FormFields[] = [
@@ -48,15 +48,15 @@ export const MovementsFiltersFields: FormFields[] = [
 ]
 
 export const movementHeaders: Header[] = [
-    {key: "date", value: "fecha"},
-    {key: "shippingCode", value: "remito"},
-    {key: "units", value: "unidades"},
-    {key: "code", value: "codigo"},
-    {key: "name", value: "aparato"},
-    {key: "brand", value: "marca"},
-    {key: "detail", value: "detalle"},
-    {key: "deposit", value: "deposito"},
-    {key: "observations", value: "observación"}
+    { key: "date", value: "fecha" },
+    { key: "shippingCode", value: "remito" },
+    { key: "units", value: "unidades" },
+    { key: "code", value: "codigo" },
+    { key: "name", value: "aparato" },
+    { key: "brand", value: "marca" },
+    { key: "detail", value: "detalle" },
+    { key: "deposit", value: "deposito" },
+    { key: "observations", value: "observación" }
 ]
 
 export const movementFormFields: FormFields[] = [
@@ -135,10 +135,10 @@ export const getDefaultFilters = () => ({
 })
 
 export const getDefaultMovement = (
-	companyId: number,
-	date="",
-	shippingCode="",
-	code=""	
+    companyId: number,
+    date = "",
+    shippingCode = "",
+    code = ""
 ): ProductMovement => ({
     id: 0,
     movementId: 0,

@@ -46,7 +46,7 @@ export const useGetProductsMovementsByCompanyId: UseGetProductsMovementsByCompan
 type CreateNewMovement = () => any
 
 export const useCreateNewMovement: CreateNewMovement = () => {
-    const [mutate, {}] = useAddNewMovementMutation();
+    const [mutate, _] = useAddNewMovementMutation();
 
     return mutate
 }

@@ -15,7 +15,7 @@ const Movements: React.FC = () => {
     const [filters, setFilters] = useState<ProductFilters>(getDefaultFilters())
     const [movementForm, setMovementForm] = useState<ProductMovement>(getDefaultMovement(companyId))
     const createNewMovement = useCreateNewMovement()
-    
+
     const autoCompleteFields = <T extends ProductFilters | ProductMovement>(state: T, codeToFind: string): T => {
         const movement = rows.find(row => row.code?.toLowerCase() == codeToFind?.toLowerCase())
 
@@ -51,8 +51,8 @@ const Movements: React.FC = () => {
 
         if (name == "code") {
             newState = autoCompleteFields(newState, value)
-        } 
-        
+        }
+
         setMovementForm(newState)
     }
 
@@ -65,7 +65,7 @@ const Movements: React.FC = () => {
     }
 
     const handleSubmit = () => {
-        createNewMovement(movementForm)
+        createNewMovement({ companyId, newMovement: movementForm })
 
         setMovementForm(getDefaultMovement(
             companyId,
@@ -91,7 +91,7 @@ const Movements: React.FC = () => {
                 formValues: filters,
                 handleChange: handleFilters,
                 onSubmit: () => console.log("Filtrando...."),
-                onReset: () => {setFilters(getDefaultFilters()); console.log("mostrar de nuevo las rows")},
+                onReset: () => { setFilters(getDefaultFilters()); console.log("mostrar de nuevo las rows") },
                 refIndex: -1
             }}
             table={{
