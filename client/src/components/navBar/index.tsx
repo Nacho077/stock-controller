@@ -23,7 +23,7 @@ const NavBar: React.FC = () => {
 
     useEffect(() => {
         setTitle(getTitle(location.pathname))
-    }, [location.pathname])
+    }, [location.pathname, actualCompany])
 
     return (
         <nav className={styles.container}>

@@ -6,10 +6,11 @@ import NavBar from './components/navBar'
 import Modal from './components/modal'
 import Companies from './views/companies'
 import Movements from './views/movements'
+import Products from './views/products'
 
 import { ModalData } from './components/modal/interfaces'
 
-import styles from './App.module.scss'
+import styles from './app.module.scss'
 
 function App() {
   const [isModalOpen, setModalOpen] = useState<boolean>(false)
@@ -43,9 +44,10 @@ function App() {
         <NavBar />
         <main>
           <Routes>
-            <Route path="/" element={<Companies />}/> {/* agregar footer */}
+            <Route path="/" element={<Companies />}/>
             <Route path="/company/create" element={<h1>TEST</h1>} />
             <Route path="/company/:companyId" element={<Movements />}/>
+            <Route path="/company/:companyId/products" element={<Products />}/>
           </Routes>
         </main>
       </div>
