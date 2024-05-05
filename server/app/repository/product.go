@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"github.com/stock-controller/app/errors"
 	"github.com/stock-controller/app/types"
 )
@@ -16,37 +15,15 @@ type ProductRepositoryInterface interface {
 }
 
 func (repository Repository) GetProducts(product types.Product) ([]types.Product, error) {
-	conditionValues := []interface{}{product.CompanyId}
-	conditions := "company_id = ?"
+	productQueries := types.ProductQueries{Product: product}
+	query, values := productQueries.GetQuery()
 
-	if product.Name != nil && *product.Name != "" {
-		conditions += " AND name = ?"
-		conditionValues = append(conditionValues, product.Name)
-	}
-
-	if product.Code != "" {
-		conditions += " AND code = ?"
-		conditionValues = append(conditionValues, product.Code)
-	}
-
-	if product.Brand != nil && *product.Brand != "" {
-		conditions += " AND brand = ?"
-		conditionValues = append(conditionValues, product.Brand)
-	}
-
-	if product.Detail != nil && *product.Detail != "" {
-		conditions += " AND detail = ?"
-		conditionValues = append(conditionValues, product.Detail)
-	}
-
-	query := fmt.Sprintf("SELECT * FROM product WHERE %s", conditions)
-
-	var productsFound []types.Product
-
-	rows, err := repository.Db.Query(query, conditionValues...)
+	rows, err := repository.Db.Query(query, values...)
 	if err != nil {
 		return nil, errors.NewFailedDependencyError("Error in get product", err.Error())
 	}
+
+	var productsFound []types.Product
 
 	if rows != nil {
 		var product types.Product
@@ -98,35 +75,8 @@ func (repository Repository) CreateProductIfNotExist(product types.Product) (*in
 }
 
 func (repository Repository) CreateProduct(product types.Product) (*int64, error) {
-	values := []interface{}{product.CompanyId}
-	emptyValues := "?"
-	valueNames := "company_id"
-
-	if product.Name != nil && *product.Name != "" {
-		emptyValues += ", ?"
-		valueNames += ", name"
-		values = append(values, product.Name)
-	}
-
-	if product.Code != "" {
-		emptyValues += ", ?"
-		valueNames += ", code"
-		values = append(values, product.Code)
-	}
-
-	if product.Brand != nil && *product.Brand != "" {
-		emptyValues += ", ?"
-		valueNames += ", brand"
-		values = append(values, product.Brand)
-	}
-
-	if product.Detail != nil && *product.Detail != "" {
-		emptyValues += ", ?"
-		valueNames += ", detail"
-		values = append(values, product.Detail)
-	}
-
-	query := fmt.Sprintf("INSERT INTO product(%s) VALUES (%s)", valueNames, emptyValues)
+	productQueries := types.ProductQueries{Product: product}
+	query, values := productQueries.CreateQuery()
 
 	result, err := repository.Db.Exec(query, values...)
 	if err != nil {
@@ -143,27 +93,9 @@ func (repository Repository) UpdateProductById(product types.Product) error {
 		return errors.NewBadRequestError("Field code is required", "User Error")
 	}
 
-	values := []interface{}{product.Code}
-	keys := "code = ?"
+	productQueries := types.ProductQueries{Product: product}
+	query, values := productQueries.UpdateQuery()
 
-	if product.Name != nil {
-		values = append(values, product.Name)
-		keys += ", name = ?"
-	}
-
-	if product.Brand != nil {
-		values = append(values, product.Brand)
-		keys += ", brand = ?"
-	}
-
-	if product.Detail != nil {
-		values = append(values, product.Detail)
-		keys += ", detail = ?"
-	}
-
-	query := fmt.Sprintf("UPDATE product SET %s WHERE id = ?", keys)
-	values = append(values, product.Id)
-	fmt.Println("QUERY: ", query)
 	_, err := repository.Db.Exec(query, values...)
 	if err != nil {
 		return errors.NewFailedDependencyError("Error in update product by id", err.Error())

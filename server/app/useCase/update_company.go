@@ -20,13 +20,15 @@ func (this UpdateCompanyById) Handle(ctx *gin.Context) {
 		return
 	}
 
-	company := types.Company{Id: &companyId}
+	var company types.Company
 
 	err = ctx.BindJSON(&company)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return
 	}
+
+	company.Id = &companyId
 
 	if company.Name == "" {
 		ctx.JSON(errors.HandleError(errors.NewBadRequestError("Field name is required", "User Error")))

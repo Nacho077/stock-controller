@@ -1,7 +1,9 @@
 package utils
 
-import "strings"
+import (
+	"strings"
+)
 
-func TrimSuffixAndAddText(string string, suffix string, additionalText string) string {
-	return strings.TrimSuffix(string, suffix) + additionalText
+func ToCapitalize(str string) string {
+	return strings.ToUpper(str[0:1]) + strings.ToLower(str[1:])
 }
