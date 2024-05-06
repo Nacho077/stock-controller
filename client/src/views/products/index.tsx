@@ -1,11 +1,11 @@
 import { ChangeEvent, useState } from "react"
-import { useParams } from "react-router-dom"
+// import { useParams } from "react-router-dom"
 
 import UpdatableTableWithFilters from "../../components/updatableTableWithFilters"
 import { Product } from "./interfaces"
 
 const Products: React.FC = () => {
-    const companyId = parseInt(useParams()["companyId"] || '0', 10)
+    // const companyId = parseInt(useParams()["companyId"] || '0', 10)
     const rows: Product[] = []
     const [productForm, setProductForm] = useState({})
 
@@ -20,7 +20,7 @@ const Products: React.FC = () => {
 
     return (
         <>
-            <UpdatableTableWithFilters 
+            <UpdatableTableWithFilters
                 isLoading={false}
                 // filters={}
                 table={{

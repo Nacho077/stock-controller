@@ -21,3 +21,14 @@ const productMovementToMovementTable = (movement: any): ProductMovement => {
 export const productMovementArrToMovementTable = (movements: any[]): ProductMovement[] => {
     return movements.map(m => productMovementToMovementTable(m))
 }
+
+export const movementToRequest = ({ date, shippingCode, units, deposit, observations, productId }: ProductMovement) => ({
+    movement: {
+        date,
+        shipping_code: shippingCode,
+        inits: parseInt(units.toString()),
+        deposit,
+        observations
+    },
+    product_id: productId
+})
