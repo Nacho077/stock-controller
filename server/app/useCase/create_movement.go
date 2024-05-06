@@ -39,6 +39,11 @@ func (this CreateMovement) Handle(ctx *gin.Context) {
 	filters := types.MovementFilters{MovementId: movementId}
 
 	movementsFound, err := this.MovementRepository.GetMovementsByCompanyId(companyId, nil, filters)
+
+	if len(movementsFound.Movements) == 0 {
+		ctx.JSON(errors.HandleError(errors.NewBadRequestError("The product Id sent does not exist in this company.", "User Error")))
+		return
+	}
 	movementCreated := movementsFound.Movements[0]
 
 	if err != nil {
