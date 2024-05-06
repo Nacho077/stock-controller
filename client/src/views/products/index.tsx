@@ -2,12 +2,19 @@ import { ChangeEvent, useState } from "react"
 import { useParams } from "react-router-dom"
 
 import UpdatableTableWithFilters from "../../components/updatableTableWithFilters"
-import { Product } from "./interfaces"
+import { useCreateNewProduct, useGetProductsByCompanyId, useUpdateProduct } from "../../hooks/apiHooks"
+import { useAppSelector } from "../../hooks"
+import { Product, getDefaultProduct, getProduct, productFormFields, productsHeaders } from "./interfaces"
+
+import styles from './products.module.scss'
 
 const Products: React.FC = () => {
     const companyId = parseInt(useParams()["companyId"] || '0', 10)
-    const rows: Product[] = []
-    const [productForm, setProductForm] = useState({})
+    const { isLoading } = useGetProductsByCompanyId(companyId)
+    const rows = useAppSelector(state => state.reducer.products)
+    const [productForm, setProductForm] = useState<Product>(getDefaultProduct(companyId))
+    const createNewProduct = useCreateNewProduct()
+    const updateProduct = useUpdateProduct()
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -18,18 +25,36 @@ const Products: React.FC = () => {
         })
     }
 
+    const resetForm = () => setProductForm(getDefaultProduct(companyId))
+
+    const handleDoubleClick = (product : Product) => setProductForm(getProduct(product, companyId))
+
+    const handleSubmit = () => {
+        console.log(productForm.id !== 0)
+        if(productForm.id === 0) {
+            createNewProduct(productForm)
+        } else {
+            updateProduct({
+                productId: productForm.id,
+                body: productForm
+            })
+        }
+        resetForm()
+    }
+
     return (
         <>
             <UpdatableTableWithFilters 
-                isLoading={false}
-                // filters={}
+                className={styles.containerMain}
+                isLoading={isLoading}
                 table={{
-                    headers: [],
+                    headers: productsHeaders,
                     rows: rows,
+                    handleDoubleClick: handleDoubleClick
                 }}
                 form={{
                     title: "Nuevo Producto",
-                    fields: [],
+                    fields: productFormFields,
                     buttons: [{
                         title: "Limpiar",
                         type: "reset"
@@ -39,7 +64,9 @@ const Products: React.FC = () => {
                     }],
                     formValues: productForm,
                     handleChange: handleChange,
-                    onSubmit: () => console.log("funciona")
+                    onSubmit: handleSubmit,
+                    onReset: resetForm,
+                    refIndex: 0
                 }}
             />
         </>

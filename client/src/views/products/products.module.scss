@@ -1,0 +1,11 @@
+.containerMain {
+    grid-template-rows: 1px 1fr auto;
+
+    form {
+        justify-content: space-around;
+
+        div {
+            grid-column: 1 / 3;
+        }
+    }
+}

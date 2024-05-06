@@ -3,7 +3,10 @@ import { api } from '../configs/api/apiconfig.ts'
 const {
     useGetCompaniesQuery,
     useGetProductsMovementsByCompanyIdQuery,
-    useAddNewMovementMutation
+    useAddNewMovementMutation,
+    useGetProductsByCompanyIdQuery,
+    useAddNewProductMutation,
+    useUpdateProductMutation
 } = api
 
 interface Company {
@@ -43,10 +46,36 @@ export const useGetProductsMovementsByCompanyId: UseGetProductsMovementsByCompan
     }
 }
 
-type CreateNewMovement = () => any
+type Mutation = () => any
 
-export const useCreateNewMovement: CreateNewMovement = () => {
+export const useCreateNewMovement: Mutation = () => {
     const [mutate, {}] = useAddNewMovementMutation();
+
+    return mutate
+}
+
+interface UseGetProducts {
+    isLoading: boolean
+}
+
+type UseGetProductsByCompanyId = (id: number) => UseGetProducts
+
+export const useGetProductsByCompanyId: UseGetProductsByCompanyId = (id: number) => {
+    const result = useGetProductsByCompanyIdQuery(id)
+
+    return {
+        isLoading: result.isLoading
+    }
+}
+
+export const useCreateNewProduct: Mutation = () => {
+    const [mutate, {}] = useAddNewProductMutation()
+
+    return mutate
+}
+
+export const useUpdateProduct: Mutation = () => {
+    const [mutate, {}] = useUpdateProductMutation()
 
     return mutate
 }
