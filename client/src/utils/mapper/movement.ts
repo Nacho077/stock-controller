@@ -26,7 +26,7 @@ export const movementToRequest = ({ date, shippingCode, units, deposit, observat
     movement: {
         date,
         shipping_code: shippingCode,
-        units,
+        inits: parseInt(units.toString()),
         deposit,
         observations
     },
