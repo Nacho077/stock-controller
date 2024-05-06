@@ -14,6 +14,8 @@ const NavBar: React.FC = () => {
         switch(true){
             case /^\/company\/create/i.test(path):
                 return "Crear una empresa"
+            case /^\/company\/[0-9]+\/products/i.test(path):
+                return "Productos"
             case /^\/company\/[0-9]+/i.test(path):
                 return actualCompany
             default: 
