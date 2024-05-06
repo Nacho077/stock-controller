@@ -30,8 +30,8 @@ func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
 		return
 	}
 
-	pagination := types.Pagination{offset, limit, orderBy, orderDirection}
-	filters := types.MovementFilters{codeFilter, nameFilter, brandFilter}
+	pagination := types.Pagination{Offset: offset, Limit: limit, OrderBy: orderBy, OrderDirection: orderDirection}
+	filters := types.MovementFilters{Code: codeFilter, Name: nameFilter, Brand: brandFilter}
 
 	parsedId, err := repository.validateId(id)
 	if err != nil {
@@ -40,7 +40,7 @@ func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
 		return
 	}
 
-	movementsResult, err := repository.MovementRepository.GetMovementsByCompanyId(parsedId, pagination, filters)
+	movementsResult, err := repository.MovementRepository.GetMovementsByCompanyId(parsedId, &pagination, filters)
 	if err != nil {
 		status, errMessage := errors.HandleError(err)
 		ctx.JSON(status, errMessage)
@@ -50,8 +50,8 @@ func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, movementsResult)
 }
 
-func (repository GetMovementsByCompany) validateId(id string) (int, error) {
-	parsedId, err := strconv.Atoi(id)
+func (repository GetMovementsByCompany) validateId(id string) (int64, error) {
+	parsedId, err := strconv.ParseInt(id, 10, 64)
 
 	if err != nil {
 		return parsedId, errors.NewBadRequestError("Error in Id, id be must a number", err.Error())
@@ -87,7 +87,3 @@ func (repository GetMovementsByCompany) getOffset(page string, pageSize string) 
 
 	return parsedPageSize, offset, nil
 }
-
-//func (repository GetMovementsByCompany) validateFilters(filter string, order string) () {
-//	filter
-//}

@@ -8,14 +8,14 @@ import (
 )
 
 type MovementRepositoryInterface interface {
-	GetMovementsByCompanyId(companyId int, pagination types.Pagination, filters types.MovementFilters) (types.MovementsResponse, error)
+	GetMovementsByCompanyId(companyId int64, pagination *types.Pagination, filters types.MovementFilters) (types.MovementsResponse, error)
 	GetMovementById(id int64) (types.Movement, error)
-	CreateMovement(movement types.Movement, productId *int64) error
+	CreateMovement(movement types.Movement, productId *int64) (int64, error)
 	UpdateMovementById(movement types.Movement) error
 	DeleteMovementById(id int64) error
 }
 
-func (repository Repository) GetMovementsByCompanyId(companyId int, pagination types.Pagination, filters types.MovementFilters) (types.MovementsResponse, error) {
+func (repository Repository) GetMovementsByCompanyId(companyId int64, pagination *types.Pagination, filters types.MovementFilters) (types.MovementsResponse, error) {
 	var response = types.MovementsResponse{}
 
 	company, err := repository.getCompanyById(companyId)
@@ -68,9 +68,9 @@ func (repository Repository) GetMovementById(id int64) (types.Movement, error) {
 	return movement, nil
 }
 
-func (repository Repository) CreateMovement(movement types.Movement, productId *int64) error {
+func (repository Repository) CreateMovement(movement types.Movement, productId *int64) (int64, error) {
 	if productId == nil {
-		return errors.NewInternalServerError("Error in Movement when trying to get product id", "Internal Error")
+		return 0, errors.NewInternalServerError("Error in Movement when trying to get product id", "Internal Error")
 	}
 
 	movementQueries := types.MovementQueries{Movement: movement}
@@ -79,16 +79,16 @@ func (repository Repository) CreateMovement(movement types.Movement, productId *
 	result, err := repository.Db.Exec(query, values...)
 
 	if err != nil {
-		return errors.NewFailedDependencyError("Error when trying to save movements", err.Error())
+		return 0, errors.NewFailedDependencyError("Error when trying to save movements", err.Error())
 	}
 	movementId, _ := result.LastInsertId()
 
 	// Create relation between products and movements
 	if _, err = repository.Db.Exec("INSERT INTO movements_products(movement_id, product_id) VALUES (?, ?)", movementId, productId); err != nil {
-		return errors.NewFailedDependencyError("Error when trying to save movements_products", err.Error())
+		return 0, errors.NewFailedDependencyError("Error when trying to save movements_products", err.Error())
 	}
 
-	return nil
+	return movementId, nil
 }
 
 func (repository Repository) UpdateMovementById(movement types.Movement) error {

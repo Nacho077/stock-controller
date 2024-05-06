@@ -8,33 +8,21 @@ import (
 )
 
 type MovementQueries struct {
-	CompanyId int
+	CompanyId int64
 	MovementFilters
-	Pagination
+	*Pagination
 	Movement
 }
 
 func (q MovementQueries) GetQuery() (string, []interface{}) {
 	values := []interface{}{q.CompanyId}
-
-	if q.OrderBy == "" {
-		q.OrderBy = "id"
-	}
-
-	if q.OrderBy != "" {
-		movementStruct := reflect.TypeOf(Movement{})
-		_, exist := movementStruct.FieldByName(utils.ToCapitalize(q.OrderBy))
-		if !exist {
-			q.OrderBy = "id"
-		}
-	}
-
-	if q.OrderDirection == "" || (q.OrderDirection != "ASC" && q.OrderDirection != "DESC") {
-		q.OrderDirection = "DESC"
-	}
-
-	var order = fmt.Sprintf("%s %s", q.OrderBy, q.OrderDirection)
 	queryFilters := " c.id = ?"
+	var orderAndPaginate string
+
+	if q.MovementId != 0 {
+		queryFilters += " AND m.Id = ?"
+		values = append(values, q.MovementId)
+	}
 
 	if q.Code != "" {
 		queryFilters += " AND p.code = ?"
@@ -54,15 +42,33 @@ func (q MovementQueries) GetQuery() (string, []interface{}) {
 		values = append(values, q.Name)
 	}
 
-	values = append(values, q.Limit, q.Offset)
+	if q.Pagination != nil {
+		if q.OrderBy == "" {
+			q.OrderBy = "id"
+		}
+
+		if q.OrderBy != "" {
+			movementStruct := reflect.TypeOf(Movement{})
+			_, exist := movementStruct.FieldByName(utils.ToCapitalize(q.OrderBy))
+			if !exist {
+				q.OrderBy = "id"
+			}
+		}
+
+		if q.OrderDirection == "" || (q.OrderDirection != "ASC" && q.OrderDirection != "DESC") {
+			q.OrderDirection = "DESC"
+		}
+
+		orderAndPaginate = fmt.Sprintf(" ORDER BY m.%s %s LIMIT ? OFFSET ?", q.OrderBy, q.OrderDirection)
+		values = append(values, q.Limit, q.Offset)
+	}
 
 	query := "SELECT p.*, m.* FROM company c"
 	query += " INNER JOIN product p ON p.company_id = c.id"
 	query += " INNER JOIN movements_products mp ON mp.product_id = p.id"
 	query += " INNER JOIN movement m ON m.id = mp.movement_id"
 	query += " WHERE" + queryFilters
-	query += " ORDER BY m." + order
-	query += " LIMIT ? OFFSET ?"
+	query += orderAndPaginate
 
 	return query, values
 }

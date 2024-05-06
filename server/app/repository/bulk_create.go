@@ -43,7 +43,7 @@ func (repository Repository) BulkCreateData(dataToSave types.DataToSave) error {
 		}
 
 		newMovement := types.Movement{Date: data.Date, ShippingCode: &data.ShippingCode, Units: data.Units, Deposit: &data.Deposit, Observations: &data.Observations}
-		if err = repository.CreateMovement(newMovement, productId); err != nil {
+		if _, err = repository.CreateMovement(newMovement, productId); err != nil {
 			return err
 		}
 	}
