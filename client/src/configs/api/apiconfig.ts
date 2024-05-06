@@ -30,11 +30,13 @@ export const api = createApi({
             }
         }),
         addNewMovement: builder.mutation({
-            query: ({ companyId, ...newMovement }) => ({
-                url: `/company/${companyId}/movements/`,
-                method: 'POST',
-                body: movementToRequest(newMovement)
-            }),
+            query: ({ companyId, newMovement }) => {
+                return {
+                    url: `/company/${companyId}/movements`,
+                    method: 'POST',
+                    body: movementToRequest(newMovement)
+                }
+            },
             async onQueryStarted({ }, { dispatch, queryFulfilled }) {
                 try {
                     const result = await queryFulfilled
