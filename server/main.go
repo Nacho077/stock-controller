@@ -15,6 +15,11 @@ func main() {
 		ctx.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		ctx.Header("Access-Control-Allow-Headers", "*")
 
+		if ctx.Request.Method == "OPTIONS" {
+			ctx.Status(200)
+			return
+		}
+
 		ctx.Next()
 	})
 

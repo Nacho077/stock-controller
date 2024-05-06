@@ -7,6 +7,7 @@ import UpdatableTableWithFilters from '../../components/updatableTableWithFilter
 import { MovementsFiltersFields, ProductFilters, ProductMovement, getDefaultFilters, getDefaultMovement, movementFormFields, movementHeaders } from './interfaces'
 
 import styles from './movements.module.scss'
+import { Link } from 'react-router-dom'
 
 const Movements: React.FC = () => {
     const companyId = parseInt(useParams()["companyId"] || '0', 10)
@@ -122,7 +123,7 @@ const Movements: React.FC = () => {
                     <span>{rows.reduce(((acc, row) => acc += Number(row.units)), 0)}
                     </span>
                 </div>
-                <button>ver productos</button>
+                <Link to={`/company/${companyId}/products`} className={styles.button}>ver productos</Link>
             </div>
         </UpdatableTableWithFilters>
     )
