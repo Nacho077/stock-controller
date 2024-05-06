@@ -30,7 +30,6 @@ const Products: React.FC = () => {
     const handleDoubleClick = (product : Product) => setProductForm(getProduct(product, companyId))
 
     const handleSubmit = () => {
-        console.log(productForm.id !== 0)
         if(productForm.id === 0) {
             createNewProduct(productForm)
         } else {

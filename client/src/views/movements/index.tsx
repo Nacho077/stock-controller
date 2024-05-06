@@ -7,6 +7,7 @@ import UpdatableTableWithFilters from '../../components/updatableTableWithFilter
 import { MovementsFiltersFields, ProductFilters, ProductMovement, getDefaultFilters, getDefaultMovement, movementFormFields, movementHeaders } from './interfaces'
 
 import styles from './movements.module.scss'
+import { Link } from 'react-router-dom'
 
 const Movements: React.FC = () => {
     const companyId = parseInt(useParams()["companyId"] || '0', 10)
@@ -15,7 +16,7 @@ const Movements: React.FC = () => {
     const [filters, setFilters] = useState<ProductFilters>(getDefaultFilters())
     const [movementForm, setMovementForm] = useState<ProductMovement>(getDefaultMovement(companyId))
     const createNewMovement = useCreateNewMovement()
-    
+
     const autoCompleteFields = <T extends ProductFilters | ProductMovement>(state: T, codeToFind: string): T => {
         const movement = rows.find(row => row.code?.toLowerCase() == codeToFind?.toLowerCase())
 
@@ -51,8 +52,8 @@ const Movements: React.FC = () => {
 
         if (name == "code") {
             newState = autoCompleteFields(newState, value)
-        } 
-        
+        }
+
         setMovementForm(newState)
     }
 
@@ -65,7 +66,7 @@ const Movements: React.FC = () => {
     }
 
     const handleSubmit = () => {
-        createNewMovement(movementForm)
+        createNewMovement({ companyId, newMovement: movementForm })
 
         setMovementForm(getDefaultMovement(
             companyId,
@@ -91,7 +92,7 @@ const Movements: React.FC = () => {
                 formValues: filters,
                 handleChange: handleFilters,
                 onSubmit: () => console.log("Filtrando...."),
-                onReset: () => {setFilters(getDefaultFilters()); console.log("mostrar de nuevo las rows")},
+                onReset: () => { setFilters(getDefaultFilters()); console.log("mostrar de nuevo las rows") },
                 refIndex: -1
             }}
             table={{
@@ -122,7 +123,7 @@ const Movements: React.FC = () => {
                     <span>{rows.reduce(((acc, row) => acc += Number(row.units)), 0)}
                     </span>
                 </div>
-                <button>ver productos</button>
+                <Link to={`/company/${companyId}/products`} className={styles.button}>ver productos</Link>
             </div>
         </UpdatableTableWithFilters>
     )

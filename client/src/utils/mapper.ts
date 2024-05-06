@@ -29,3 +29,14 @@ export const productToDomain = (product: any): Product => {
         company_id: 0
     }
 }
+
+export const movementToRequest = ({ date, shippingCode, units, deposit, observations, productId }: ProductMovement) => ({
+    movement: {
+        date,
+        shipping_code: shippingCode,
+        inits: parseInt(units.toString()),
+        deposit,
+        observations
+    },
+    product_id: productId
+})
