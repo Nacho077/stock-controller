@@ -8,7 +8,7 @@ import (
 
 type CompanyRepositoryInterface interface {
 	GetCompanies() ([]types.Company, error)
-	getCompanyById(id int) (types.Company, error)
+	getCompanyById(id int64) (types.Company, error)
 	GetCompanyIdByName(name string) (int64, error)
 	CreateCompanyIfNotExist(name string) (int64, error)
 	DeleteCompanyById(id int64) error
@@ -34,7 +34,7 @@ func (repository Repository) GetCompanies() ([]types.Company, error) {
 	return companies, nil
 }
 
-func (repository Repository) getCompanyById(id int) (types.Company, error) {
+func (repository Repository) getCompanyById(id int64) (types.Company, error) {
 	var company types.Company
 	err := repository.Db.QueryRow("SELECT * FROM company WHERE company.id = ?", id).Scan(&company.Id, &company.Name)
 
