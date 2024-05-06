@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"database/sql"
+	goErrors "errors"
 	"github.com/stock-controller/app/errors"
 	"github.com/stock-controller/app/types"
 )
@@ -25,6 +27,12 @@ func (repository Repository) GetMovementsByCompanyId(companyId int, pagination t
 
 	movementQuery := types.MovementQueries{CompanyId: companyId, MovementFilters: filters, Pagination: pagination}
 	query, values := movementQuery.GetQuery()
+	unitsQuery, unitsQueryValues := movementQuery.GetTotalUnitsQuery()
+
+	err = repository.Db.QueryRow(unitsQuery, unitsQueryValues...).Scan(&response.TotalUnits)
+	if err != nil {
+		return response, errors.NewFailedDependencyError("Error in database when bringing total movements units", err.Error())
+	}
 
 	movementsRow, err := repository.Db.Query(query, values...)
 	if err != nil {
@@ -34,18 +42,13 @@ func (repository Repository) GetMovementsByCompanyId(companyId int, pagination t
 	movements := make([]types.ProductMovement, 0)
 	var movement types.ProductMovement
 
-	if movementsRow == nil {
-		return response, nil
-	}
-
-	for movementsRow.Next() {
+	for movementsRow != nil && movementsRow.Next() {
 		err = movementsRow.Scan(&movement.ProductId, &movement.Code, &movement.Name, &movement.Brand, &movement.Detail, &movement.CompanyId, &movement.MovementId, &movement.Date, &movement.ShippingCode, &movement.Units, &movement.Deposit, &movement.Observations)
 		if err != nil {
 			return response, errors.NewInternalServerError("Error in scan when converting movement", err.Error())
 		}
 		movements = append(movements, movement)
 	}
-
 	response.Movements = movements
 
 	return response, nil
@@ -56,6 +59,9 @@ func (repository Repository) GetMovementById(id int64) (types.Movement, error) {
 
 	err := repository.Db.QueryRow("SELECT * FROM movement WHERE id = ?", id).Scan(&movement.Id, &movement.Date, &movement.ShippingCode, &movement.Units, &movement.Deposit, &movement.Observations)
 	if err != nil {
+		if goErrors.As(err, &sql.ErrNoRows) {
+			return movement, errors.NewBadRequestError("Movement id not exist", err.Error())
+		}
 		return movement, errors.NewFailedDependencyError("Error in get movement by id", err.Error())
 	}
 

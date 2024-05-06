@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"database/sql"
+	goErrors "errors"
 	"github.com/stock-controller/app/errors"
 	"github.com/stock-controller/app/types"
 )
@@ -45,6 +47,9 @@ func (repository Repository) GetProductById(id int64) (types.Product, error) {
 
 	err := repository.Db.QueryRow("SELECT * FROM product WHERE id = ?", id).Scan(&product.Id, &product.Code, &product.Name, &product.Brand, &product.Detail, &product.CompanyId)
 	if err != nil {
+		if goErrors.As(err, &sql.ErrNoRows) {
+			return product, errors.NewBadRequestError("Product id not exist", err.Error())
+		}
 		return product, errors.NewFailedDependencyError("Error in get product by id", err.Error())
 	}
 

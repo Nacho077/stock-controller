@@ -67,6 +67,37 @@ func (q MovementQueries) GetQuery() (string, []interface{}) {
 	return query, values
 }
 
+func (q MovementQueries) GetTotalUnitsQuery() (string, []interface{}) {
+	values := []interface{}{q.CompanyId}
+	queryFilters := " c.id = ?"
+
+	if q.Code != "" {
+		queryFilters += " AND p.code = ?"
+		strings.ToLower(q.Code)
+		values = append(values, q.Code)
+	}
+
+	if q.Brand != "" {
+		queryFilters += " AND p.brand = ?"
+		strings.ToLower(q.Brand)
+		values = append(values, q.Brand)
+	}
+
+	if q.Name != "" {
+		queryFilters += " AND p.name = ?"
+		strings.ToLower(q.Name)
+		values = append(values, q.Name)
+	}
+
+	query := "SELECT COALESCE(SUM(m.units), 0) FROM company c "
+	query += " INNER JOIN product p ON p.company_id = c.id"
+	query += " INNER JOIN movements_products mp ON mp.product_id = p.id"
+	query += " INNER JOIN movement m ON m.id = mp.movement_id"
+	query += " WHERE" + queryFilters
+
+	return query, values
+}
+
 func (q MovementQueries) CreateQuery() (string, []interface{}) {
 	emptyValues := "?, ?, ?"
 	nameValues := "date, shipping_code, units"

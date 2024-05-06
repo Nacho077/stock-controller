@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"database/sql"
+	goErrors "errors"
 	"fmt"
 	"github.com/stock-controller/app/errors"
 	"github.com/stock-controller/app/types"
@@ -37,8 +39,10 @@ func (repository Repository) GetCompanies() ([]types.Company, error) {
 func (repository Repository) getCompanyById(id int) (types.Company, error) {
 	var company types.Company
 	err := repository.Db.QueryRow("SELECT * FROM company WHERE company.id = ?", id).Scan(&company.Id, &company.Name)
-
 	if err != nil {
+		if goErrors.As(err, &sql.ErrNoRows) {
+			return company, errors.NewBadRequestError("Company id not exist", err.Error())
+		}
 		return company, errors.NewFailedDependencyError(fmt.Sprintf("Error in database when bringing company with id %d", id), err.Error())
 	}
 
