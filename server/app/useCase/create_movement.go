@@ -16,7 +16,7 @@ type CreateMovement struct {
 func (this CreateMovement) Handle(ctx *gin.Context) {
 	var movementWithProductId types.MovementWithProductId
 
-	_, err := strconv.ParseInt(ctx.Param("companyId"), 10, 64)
+	companyId, err := strconv.ParseInt(ctx.Param("companyId"), 10, 64)
 	if err != nil {
 		ctx.JSON(errors.HandleError(errors.NewBadRequestError("invalid param company id", "User Error")))
 		return
@@ -30,12 +30,21 @@ func (this CreateMovement) Handle(ctx *gin.Context) {
 		return
 	}
 
-	err = this.MovementRepository.CreateMovement(movementWithProductId.Movement, &movementWithProductId.ProductId)
+	movementId, err := this.MovementRepository.CreateMovement(movementWithProductId.Movement, &movementWithProductId.ProductId)
+	if err != nil {
+		ctx.JSON(errors.HandleError(err))
+		return
+	}
+
+	filters := types.MovementFilters{MovementId: movementId}
+
+	movementsFound, err := this.MovementRepository.GetMovementsByCompanyId(companyId, nil, filters)
+	movementCreated := movementsFound.Movements[0]
 
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, "Created Successfully")
+	ctx.JSON(http.StatusOK, movementCreated)
 }

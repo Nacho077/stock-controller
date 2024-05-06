@@ -12,8 +12,13 @@ func main() {
 
 	app.Use(func(ctx *gin.Context) {
 		ctx.Header("Access-Control-Allow-Origin", "*")
-		ctx.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		ctx.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
 		ctx.Header("Access-Control-Allow-Headers", "*")
+
+		if ctx.Request.Method == "OPTIONS" {
+			ctx.Status(200)
+			return
+		}
 
 		ctx.Next()
 	})
