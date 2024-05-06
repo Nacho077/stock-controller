@@ -18,25 +18,54 @@ type MovementRepositoryInterface interface {
 func (repository Repository) GetMovementsByCompanyId(companyId int64, pagination *types.Pagination, filters types.MovementFilters) (types.MovementsResponse, error) {
 	var response = types.MovementsResponse{}
 
-	company, err := repository.getCompanyById(companyId)
-	if err != nil {
-		return response, err
-	}
-
-	response.CompanyName = company.Name
+	var (
+		companyNameChannel = make(chan types.AsyncResponse[string])
+		movementsChannel   = make(chan types.AsyncResponse[[]types.ProductMovement])
+		totalUnitsChannel  = make(chan types.AsyncResponse[int])
+	)
 
 	movementQuery := types.MovementQueries{CompanyId: companyId, MovementFilters: filters, Pagination: pagination}
-	query, values := movementQuery.GetQuery()
-	unitsQuery, unitsQueryValues := movementQuery.GetTotalUnitsQuery()
 
-	err = repository.Db.QueryRow(unitsQuery, unitsQueryValues...).Scan(&response.TotalUnits)
-	if err != nil {
-		return response, errors.NewFailedDependencyError("Error in database when bringing total movements units", err.Error())
+	go repository.getCompanyName(companyId, companyNameChannel)
+	go repository.getMovements(movementQuery, movementsChannel)
+	go repository.getTotalUnits(movementQuery, totalUnitsChannel)
+
+	companyNameResponse := <-companyNameChannel
+	if companyNameResponse.Error != nil {
+		return response, companyNameResponse.Error
 	}
+	response.CompanyName = companyNameResponse.Data
+
+	movementsResponse := <-movementsChannel
+	if movementsResponse.Error != nil {
+		return response, movementsResponse.Error
+	}
+	response.Movements = movementsResponse.Data
+
+	totalUnitsResponse := <-totalUnitsChannel
+	if totalUnitsResponse.Error != nil {
+		return response, totalUnitsResponse.Error
+	}
+	response.TotalUnits = totalUnitsResponse.Data
+
+	return response, nil
+}
+
+func (repository Repository) getCompanyName(companyId int64, companyNameChannel chan types.AsyncResponse[string]) {
+	company, err := repository.getCompanyById(companyId)
+	if err != nil {
+		companyNameChannel <- types.AsyncResponse[string]{Error: err}
+	}
+
+	companyNameChannel <- types.AsyncResponse[string]{company.Name, nil}
+}
+
+func (repository Repository) getMovements(movementQuery types.MovementQueries, movementsChannel chan types.AsyncResponse[[]types.ProductMovement]) {
+	query, values := movementQuery.GetQuery()
 
 	movementsRow, err := repository.Db.Query(query, values...)
 	if err != nil {
-		return response, errors.NewFailedDependencyError("Error in database when bringing movements and related products", err.Error())
+		movementsChannel <- types.AsyncResponse[[]types.ProductMovement]{Error: errors.NewFailedDependencyError("Error in database when bringing movements and related products", err.Error())}
 	}
 
 	movements := make([]types.ProductMovement, 0)
@@ -45,13 +74,23 @@ func (repository Repository) GetMovementsByCompanyId(companyId int64, pagination
 	for movementsRow != nil && movementsRow.Next() {
 		err = movementsRow.Scan(&movement.ProductId, &movement.Code, &movement.Name, &movement.Brand, &movement.Detail, &movement.CompanyId, &movement.MovementId, &movement.Date, &movement.ShippingCode, &movement.Units, &movement.Deposit, &movement.Observations)
 		if err != nil {
-			return response, errors.NewInternalServerError("Error in scan when converting movement", err.Error())
+			movementsChannel <- types.AsyncResponse[[]types.ProductMovement]{Error: errors.NewInternalServerError("Error in scan when converting movement", err.Error())}
 		}
 		movements = append(movements, movement)
 	}
-	response.Movements = movements
+	movementsChannel <- types.AsyncResponse[[]types.ProductMovement]{Data: movements, Error: nil}
+}
 
-	return response, nil
+func (repository Repository) getTotalUnits(movementQuery types.MovementQueries, totalUnitsChannel chan types.AsyncResponse[int]) {
+	unitsQuery, unitsQueryValues := movementQuery.GetTotalUnitsQuery()
+
+	var totalUnits int
+	err := repository.Db.QueryRow(unitsQuery, unitsQueryValues...).Scan(&totalUnits)
+	if err != nil {
+		totalUnitsChannel <- types.AsyncResponse[int]{Error: errors.NewFailedDependencyError("Error in database when bringing total movements units", err.Error())}
+	}
+
+	totalUnitsChannel <- types.AsyncResponse[int]{Data: totalUnits, Error: nil}
 }
 
 func (repository Repository) GetMovementById(id int64) (types.Movement, error) {
