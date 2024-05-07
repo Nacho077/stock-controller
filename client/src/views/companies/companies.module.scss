@@ -1,6 +1,34 @@
 .containerMain {
     height: 100%;
     @include flex(column, center, space-between);
+    position: relative;
+
+    .containerModal {
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.5);
+        height: 100%;
+        width: 100vw;
+        bottom: 0;
+
+        form {
+            position: absolute;
+            left: 25%;
+            top: 15%;
+            background-color: white;
+            height: 50%;
+            width: 50%;
+            border-radius: 15px;
+
+            div{
+                grid-template-columns: 1fr;
+
+                input {
+                    width: 50% !important;
+                    margin-left: 25px;
+                }
+            }
+        }
+    }
     
     .container {
         justify-content: center;
@@ -8,10 +36,28 @@
         height: 70%;
         @include flex(row, center, space-evenly);
 
+        #createButton {
+            display: block;
+        }
+
         .company {
+            display: grid;
+            grid-template-columns: 10% 1fr 10%;
             text-transform: capitalize;
             @include button();
             width: 20%;
+
+            a {
+                grid-column: 2/3;
+                color: $secondaryColor;
+                font-size: 1em;
+                font-family: inherit;
+            }
+
+            img {
+                padding-left: 50%;
+                align-self: center;
+            }
         }
     }
 }

@@ -1,16 +1,50 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { setInitialMovements, setError, setActualCompany, addMovement, setInitialProducts, addProduct, updateProduct, setTotalUnits, updateMovement } from '../redux/slice'
+import { setInitialMovements, setError, setActualCompany, addMovement, setInitialProducts, addProduct, updateProduct, setTotalUnits, updateMovement, setCompanies, addCompany, updateCompany } from '../redux/slice'
 import { ApiError } from './apiError'
-import { movementToCreateRequest, movementToUpdateRequest, productMovementToMovementTable, productToDomain, updateResponseToMovement } from '../../utils/mapper'
+import { companyToDomain, movementToCreateRequest, movementToUpdateRequest, productMovementToMovementTable, productToDomain, updateResponseToMovement } from '../../utils/mapper'
 
 export const api = createApi({
     baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8080/', timeout: 1000 }),
     endpoints: builder => ({
         getCompanies: builder.query({
-            query: () => ({ url: 'company/' }),
-            async onQueryStarted({ }, { dispatch, queryFulfilled }) {
+            query: () => ({ url: '/company/' }),
+            transformResponse: (response: any[]) => response?.map(companyToDomain) || [],
+            async onQueryStarted({}, { dispatch, queryFulfilled }) {
                 try {
-                    await queryFulfilled
+                    const result = await queryFulfilled
+                    dispatch(setCompanies(result.data))
+                } catch (err: any) {
+                    dispatch(setError(err.error as ApiError))
+                }
+            }
+        }),
+        addNewCompany: builder.mutation({
+            query: (body) => ({
+                url: `/company/`,
+                method: 'POST',
+                body: body
+            }),
+            transformResponse: companyToDomain,
+            async onQueryStarted({}, {dispatch, queryFulfilled}) {
+                try {
+                    const result = await queryFulfilled
+                    dispatch(addCompany(result.data))
+                } catch (err: any) {
+                    dispatch(setError(err.error as ApiError))
+                }
+            }
+        }),
+        updateCompany: builder.mutation({
+            query: ({companyId, body}) => ({
+                url: `/company/${companyId}`,
+                method: 'PUT',
+                body: body
+            }),
+            transformResponse: companyToDomain,
+            async onQueryStarted({}, {dispatch, queryFulfilled}) {
+                try {
+                    const result = await queryFulfilled
+                    dispatch(updateCompany(result.data))
                 } catch (err: any) {
                     dispatch(setError(err.error as ApiError))
                 }
@@ -23,7 +57,7 @@ export const api = createApi({
             transformResponse: (response: any) => ({
               companyName: response["company_name"],
               totalUnits: response["total_units"],
-              movements: response.movements.map((m: any) => productMovementToMovementTable(m))
+              movements: response.movements?.map(productMovementToMovementTable) || []
             }),
             async onQueryStarted({}, {dispatch, queryFulfilled}) {
                 try {
@@ -42,7 +76,7 @@ export const api = createApi({
                 method: 'POST',
                 body: movementToCreateRequest(newMovement)
             }),
-            transformResponse: response => productMovementToMovementTable(response),
+            transformResponse: productMovementToMovementTable,
             async onQueryStarted({}, {dispatch, queryFulfilled}) {
                 try {
                     const result = await queryFulfilled
@@ -58,7 +92,7 @@ export const api = createApi({
                 method: 'PUT',
                 body: movementToUpdateRequest(body)
             }),
-            transformResponse: response => updateResponseToMovement(response),
+            transformResponse: updateResponseToMovement,
             async onQueryStarted({}, {dispatch, queryFulfilled}) {
                 try {
                     const result = await queryFulfilled
@@ -70,7 +104,7 @@ export const api = createApi({
         }),
         getProductsByCompanyId: builder.query({
             query: (companyId: number) => ({url: `/company/${companyId}/products`}),
-            transformResponse: (response: any[]) => response.map((r: any) => productToDomain(r)),
+            transformResponse: (response: any[]) => response?.map(productToDomain) || [],
             async onQueryStarted({}, {dispatch, queryFulfilled}) {
                 try {
                     const result = await queryFulfilled
@@ -102,7 +136,7 @@ export const api = createApi({
                 method: 'PUT',
                 body
             }),
-            transformResponse: (response: any) => productToDomain(response),
+            transformResponse: productToDomain,
             async onQueryStarted({}, {dispatch, queryFulfilled}) {
                 try {
                     const result = await queryFulfilled
