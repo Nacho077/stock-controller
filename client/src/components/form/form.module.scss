@@ -21,7 +21,8 @@
 
         .containerInput {
             label {
-                font-size: small;
+                font-size: large;
+                font-weight: 400;
                 text-transform: capitalize;
             }
 
@@ -33,6 +34,8 @@
                 border-radius: 5px;
                 outline: none;
                 padding: 3px 5px 5px 5px;
+                height: 1.5rem;
+                font-size: large;
             
                 &[type=date] {
                     position: relative;
@@ -45,16 +48,27 @@
                         cursor: pointer;
                     }
 
-                    &::after {
+                    &::before {
                         content: "\1F4C6";
+                        position: absolute;
                         font-size: 1.2em;
                         cursor: pointer;
+                        right: 8px;
+                        top: 2px;
                     }
                 }
 
                 &:focus {
                     border: 1px solid gray;
                     outline: none;
+                }
+
+                &:disabled {
+                    background-color: rgba(0, 0, 0, 0.3);
+
+                    &:hover {
+                        cursor: not-allowed;
+                    }
                 }
             }
         }

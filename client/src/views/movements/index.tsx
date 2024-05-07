@@ -1,6 +1,6 @@
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useGetProductsMovementsByCompanyId, useAppSelector, useCreateNewMovement } from '../../hooks'
+import { useAppSelector, useCreateNewMovement } from '../../hooks'
 
 import UpdatableTableWithFilters from '../../components/updatableTableWithFilters'
 
@@ -8,22 +8,39 @@ import { MovementsFiltersFields, ProductFilters, ProductMovement, getDefaultFilt
 
 import styles from './movements.module.scss'
 import { Link } from 'react-router-dom'
+import { useGetProductsByCompanyId, useGetProductsMovementsFiltered, useUpdateMovement } from '../../hooks'
 
 const Movements: React.FC = () => {
     const companyId = parseInt(useParams()["companyId"] || '0', 10)
-    const { isLoading } = useGetProductsMovementsByCompanyId(companyId)
-    const rows = useAppSelector(state => state.reducer.movements)
+    const useFilters = useGetProductsMovementsFiltered()
+    useGetProductsByCompanyId(companyId)
+    const {movements: rows, totalUnits, products} = useAppSelector(state => state.reducer)
     const [filters, setFilters] = useState<ProductFilters>(getDefaultFilters())
     const [movementForm, setMovementForm] = useState<ProductMovement>(getDefaultMovement(companyId))
     const createNewMovement = useCreateNewMovement()
+    const updateMovement = useUpdateMovement()
+    const [isLoading, setLoading] = useState<boolean>(false)
+
+    const updateMovements = (filters: ProductFilters) => {
+        setLoading(true)
+        useFilters(companyId, filters)
+        .then(() => setLoading(false))
+    }
+
+    useEffect(() => updateMovements(filters), [])
 
     const autoCompleteFields = <T extends ProductFilters | ProductMovement>(state: T, codeToFind: string): T => {
         const movement = rows.find(row => row.code?.toLowerCase() == codeToFind?.toLowerCase())
+        const productFounded = products.find(product => product.name?.toLowerCase() == codeToFind?.toLowerCase())
 
         return {
             ...state,
             brand: movement?.brand || state.brand,
-            name: movement?.name || state.name
+            name: movement?.name || state.name,
+            detail: movement?.detail || (state as ProductMovement).detail,
+            deposit: movement?.deposit || (state as ProductMovement).deposit,
+            observations: movement?.observations || (state as ProductMovement).observations,
+            productId: productFounded?.id,
         }
     }
 
@@ -40,6 +57,11 @@ const Movements: React.FC = () => {
         }
 
         setFilters(newState)
+    }
+
+    const clearFilters = () => {
+      setFilters(getDefaultFilters())
+      updateMovements(getDefaultFilters())
     }
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -66,7 +88,11 @@ const Movements: React.FC = () => {
     }
 
     const handleSubmit = () => {
-        createNewMovement({ companyId, newMovement: movementForm })
+        if (movementForm.movementId === 0) {
+            createNewMovement(companyId, movementForm)
+        } else {
+            updateMovement(companyId, movementForm.movementId, movementForm)
+        }
 
         setMovementForm(getDefaultMovement(
             companyId,
@@ -91,8 +117,8 @@ const Movements: React.FC = () => {
                 }],
                 formValues: filters,
                 handleChange: handleFilters,
-                onSubmit: () => console.log("Filtrando...."),
-                onReset: () => { setFilters(getDefaultFilters()); console.log("mostrar de nuevo las rows") },
+                onSubmit: () => updateMovements(filters),
+                onReset: clearFilters,
                 refIndex: -1
             }}
             table={{
@@ -101,8 +127,8 @@ const Movements: React.FC = () => {
                 handleDoubleClick: handleDoubleClick
             }}
             form={{
-                title: "Nuevo Movimiento",
-                fields: movementFormFields,
+                title: movementForm.movementId === 0 ? "Nuevo Movimiento" : "Modificar Movimiento",
+                fields: movementFormFields(movementForm.movementId !== 0),
                 buttons: [{
                     title: "Limpiar",
                     type: "reset"
@@ -120,8 +146,7 @@ const Movements: React.FC = () => {
             <div className={styles.containerInfo}>
                 <div>
                     <span>Cant Total</span>
-                    <span>{rows.reduce(((acc, row) => acc += Number(row.units)), 0)}
-                    </span>
+                    <span>{totalUnits}</span>
                 </div>
                 <Link to={`/company/${companyId}/products`} className={styles.button}>ver productos</Link>
             </div>

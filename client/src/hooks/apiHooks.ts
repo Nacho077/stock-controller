@@ -1,12 +1,15 @@
 import { api } from '../configs/api/apiconfig.ts'
+import { ProductFilters, ProductMovement } from '../views/movements/interfaces.ts'
+import { Product } from '../views/products/interfaces.ts'
 
 const {
     useGetCompaniesQuery,
-    useGetProductsMovementsByCompanyIdQuery,
+    useGetProductsMovementsFilteredMutation,
     useAddNewMovementMutation,
+    useUpdateMovementMutation,
     useGetProductsByCompanyIdQuery,
     useAddNewProductMutation,
-    useUpdateProductMutation
+    useUpdateProductMutation,
 } = api
 
 interface Company {
@@ -32,26 +35,22 @@ export const useGetCompanies: () => UseGetCompaniesResult = () => {
     }
 }
 
-interface UseGetProductMovements {
-    isLoading: boolean
+export const useGetProductsMovementsFiltered = () => {
+    const [mutate, {}] = useGetProductsMovementsFilteredMutation()
+
+    return (companyId: number, filters: ProductFilters) => mutate({companyId, filters})
 }
 
-type UseGetProductsMovementsByCompanyId = (id: number) => UseGetProductMovements
+export const useCreateNewMovement = () => {
+    const [mutate, {}] = useAddNewMovementMutation()
 
-export const useGetProductsMovementsByCompanyId: UseGetProductsMovementsByCompanyId = (id: number) => {
-    const result = useGetProductsMovementsByCompanyIdQuery(id)
-
-    return {
-        isLoading: result.isLoading
-    }
+    return (companyId: number, newMovement: ProductMovement) => mutate({companyId, newMovement})
 }
 
-type Mutation = () => any
+export const useUpdateMovement = () => {
+    const [mutate, {}] = useUpdateMovementMutation()
 
-export const useCreateNewMovement: Mutation = () => {
-    const [mutate, {}] = useAddNewMovementMutation();
-
-    return mutate
+    return (companyId: number, movementId: number, body: ProductMovement) => mutate({companyId, movementId, body})
 }
 
 interface UseGetProducts {
@@ -68,14 +67,14 @@ export const useGetProductsByCompanyId: UseGetProductsByCompanyId = (id: number)
     }
 }
 
-export const useCreateNewProduct: Mutation = () => {
+export const useCreateNewProduct = () => {
     const [mutate, {}] = useAddNewProductMutation()
 
-    return mutate
+    return (body: Product) => mutate(body)
 }
 
-export const useUpdateProduct: Mutation = () => {
+export const useUpdateProduct = () => {
     const [mutate, {}] = useUpdateProductMutation()
 
-    return mutate
+    return (productId: number, body: Product) => mutate({productId, body})
 }

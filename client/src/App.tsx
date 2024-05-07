@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
-import { useAppSelector } from './hooks'
+import { useAppDispatch, useAppSelector } from './hooks'
 import { useEffect, useState } from 'react'
 
 import NavBar from './components/navBar'
@@ -11,11 +11,13 @@ import Products from './views/products'
 import { ModalData } from './components/modal/interfaces'
 
 import styles from './app.module.scss'
+import { clearError } from './configs/redux/slice'
 
 function App() {
   const [isModalOpen, setModalOpen] = useState<boolean>(false)
   const [modalData, setModalData] = useState<ModalData>({ text: "", buttons: [] })
   const error = useAppSelector(state => state.reducer.error)
+  const dispatch = useAppDispatch()
 
   useEffect(() => {
     if (error !== "") {
@@ -35,7 +37,10 @@ function App() {
     setModalOpen(true)
   }
 
-  const hideModal = () => setModalOpen(false)
+  const hideModal = () => {
+    dispatch(clearError())
+    setModalOpen(false)
+  }
 
   return (
     <>

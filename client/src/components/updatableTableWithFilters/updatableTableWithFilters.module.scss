@@ -1,9 +1,10 @@
 .containerMain {
+    margin-top: 10px;
     display: grid;
     grid-template-columns: 3fr 1fr;
-    grid-template-rows: 60px 1fr auto;
+    grid-template-rows: 80px 1fr auto;
     row-gap: 10px;
-    height: 98%;
+    height: 97.5%;
     justify-items: center;
 
     .containerFilter {
@@ -35,6 +36,7 @@
 
                         input {
                             width: 50%;
+                            height: 1.5rem;
                         }
                     }
                 }
@@ -48,7 +50,7 @@
 
     .containerTable {
         grid-row: 2 / 4;
-        margin-left: 10px;
+        margin-left: 20px;
         max-height: 100%;
         width: 75vw;
         max-width: 75vw;
@@ -60,7 +62,7 @@
     
     form {
         min-width: 300px;
-        div{
+        div {
             @include flex(column, flex-start);
         }
     }

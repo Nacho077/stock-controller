@@ -2,7 +2,7 @@ import { ChangeEvent, useState } from "react"
 import { useParams } from "react-router-dom"
 
 import UpdatableTableWithFilters from "../../components/updatableTableWithFilters"
-import { useCreateNewProduct, useGetProductsByCompanyId, useUpdateProduct } from "../../hooks/apiHooks"
+import { useCreateNewProduct, useUpdateProduct } from "../../hooks"
 import { useAppSelector } from "../../hooks"
 import { Product, getDefaultProduct, getProduct, productFormFields, productsHeaders } from "./interfaces"
 
@@ -10,7 +10,6 @@ import styles from './products.module.scss'
 
 const Products: React.FC = () => {
     const companyId = parseInt(useParams()["companyId"] || '0', 10)
-    const { isLoading } = useGetProductsByCompanyId(companyId)
     const rows = useAppSelector(state => state.reducer.products)
     const [productForm, setProductForm] = useState<Product>(getDefaultProduct(companyId))
     const createNewProduct = useCreateNewProduct()
@@ -30,14 +29,12 @@ const Products: React.FC = () => {
     const handleDoubleClick = (product : Product) => setProductForm(getProduct(product, companyId))
 
     const handleSubmit = () => {
-        if(productForm.id === 0) {
+        if (productForm.id === 0) {
             createNewProduct(productForm)
         } else {
-            updateProduct({
-                productId: productForm.id,
-                body: productForm
-            })
+            updateProduct(productForm.id, productForm)
         }
+        
         resetForm()
     }
 
@@ -45,7 +42,7 @@ const Products: React.FC = () => {
         <>
             <UpdatableTableWithFilters 
                 className={styles.containerMain}
-                isLoading={isLoading}
+                isLoading={false}
                 table={{
                     headers: productsHeaders,
                     rows: rows,
