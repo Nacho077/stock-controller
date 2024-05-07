@@ -29,6 +29,7 @@ const Movements: React.FC = () => {
 
     useEffect(() => updateMovements(filters), [])
 
+
     const autoCompleteFields = <T extends ProductFilters | ProductMovement>(state: T, codeToFind: string): T => {
         const movement = rows.find(row => row.code?.toLowerCase() == codeToFind?.toLowerCase())
         const productFounded = products.find(product => product.name?.toLowerCase() == codeToFind?.toLowerCase())
@@ -102,6 +103,16 @@ const Movements: React.FC = () => {
         ))
     }
 
+    const getAvailableProductsToAutocomplete = () => {
+        if (movementForm.code === "" && movementForm.name === "" && movementForm.brand === "") return products
+    
+        return products.filter(product => 
+            (movementForm.code !== "" && product.code.includes(movementForm.code)) ||
+            (movementForm.name !== "" && product.name.includes(movementForm.name)) ||
+            (movementForm.brand !== "" && product.brand.includes(movementForm.brand))
+        )
+    }
+
     return (
         <UpdatableTableWithFilters
             className={styles.containerMain}
@@ -128,7 +139,7 @@ const Movements: React.FC = () => {
             }}
             form={{
                 title: movementForm.movementId === 0 ? "Nuevo Movimiento" : "Modificar Movimiento",
-                fields: movementFormFields(movementForm.movementId !== 0),
+                fields: movementFormFields(movementForm.movementId !== 0, getAvailableProductsToAutocomplete()),
                 buttons: [{
                     title: "Limpiar",
                     type: "reset"

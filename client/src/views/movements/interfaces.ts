@@ -1,6 +1,7 @@
 import { getDateNowString } from '../../utils/date';
 import { FormFields } from '../../components/form/interfaces';
 import { Header, Row } from '../../components/table/interfaces';
+import { Product } from '../products/interfaces';
 
 export interface ProductMovement extends Row {
     movementId: number
@@ -59,7 +60,9 @@ export const movementHeaders: Header[] = [
     { key: "observations", value: "observación" }
 ]
 
-export const movementFormFields = (isUpdate: boolean): FormFields[] => [
+const removeDuplicates = (arr: any[]) => [...new Set(arr)]
+
+export const movementFormFields = (isUpdate: boolean, products: Product[]): FormFields[] => [
     {
         label: "fecha",
         type: "date",
@@ -80,10 +83,10 @@ export const movementFormFields = (isUpdate: boolean): FormFields[] => [
         label: "codigo",
         type: "text",
         name: "code",
-        datalist: [],
+        datalist: removeDuplicates(products.map(p => p.code.trim().toLowerCase())),
         required: true,
         autoComplete: "off",
-        disabled: isUpdate && true,
+        disabled: isUpdate,
     },
     {
         label: "unidades",
@@ -96,17 +99,17 @@ export const movementFormFields = (isUpdate: boolean): FormFields[] => [
         label: "aparato",
         type: "text",
         name: "name",
-        datalist: [],
+        datalist: removeDuplicates(products.map(p => p.name.trim().toLowerCase())),
         autoComplete: "off",
-        disabled: isUpdate && true,
+        disabled: isUpdate,
     },
     {
         label: "marca",
         type: "text",
         name: "brand",
-        datalist: [],
+        datalist: removeDuplicates(products.map(p => p.brand.trim().toLowerCase())),
         autoComplete: "off",
-        disabled: isUpdate && true,
+        disabled: isUpdate,
     },
     {
         label: "detalle",
@@ -114,7 +117,7 @@ export const movementFormFields = (isUpdate: boolean): FormFields[] => [
         name: "detail",
         datalist: [],
         autoComplete: "off",
-        disabled: isUpdate && true,
+        disabled: isUpdate,
     },
     {
         label: "deposito",
