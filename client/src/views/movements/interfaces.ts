@@ -59,14 +59,14 @@ export const movementHeaders: Header[] = [
     { key: "observations", value: "observación" }
 ]
 
-export const movementFormFields: FormFields[] = [
+export const movementFormFields = (isUpdate: boolean): FormFields[] => [
     {
         label: "fecha",
         type: "date",
         name: "date",
         datalist: [],
         required: true,
-        autoComplete: "off"
+        autoComplete: "off",
     },
     {
         label: "remito",
@@ -82,7 +82,8 @@ export const movementFormFields: FormFields[] = [
         name: "code",
         datalist: [],
         required: true,
-        autoComplete: "off"
+        autoComplete: "off",
+        disabled: isUpdate && true,
     },
     {
         label: "unidades",
@@ -96,21 +97,24 @@ export const movementFormFields: FormFields[] = [
         type: "text",
         name: "name",
         datalist: [],
-        autoComplete: "off"
+        autoComplete: "off",
+        disabled: isUpdate && true,
     },
     {
         label: "marca",
         type: "text",
         name: "brand",
         datalist: [],
-        autoComplete: "off"
+        autoComplete: "off",
+        disabled: isUpdate && true,
     },
     {
         label: "detalle",
         type: "text",
         name: "detail",
         datalist: [],
-        autoComplete: "off"
+        autoComplete: "off",
+        disabled: isUpdate && true,
     },
     {
         label: "deposito",

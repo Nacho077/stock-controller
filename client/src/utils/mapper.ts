@@ -30,13 +30,37 @@ export const productToDomain = (product: any): Product => {
     }
 }
 
-export const movementToRequest = ({ date, shippingCode, units, deposit, observations, productId }: ProductMovement) => ({
+export const movementToCreateRequest = ({ date, shippingCode, units, deposit, observations, productId }: ProductMovement) => ({
     movement: {
         date,
         shipping_code: shippingCode,
-        inits: parseInt(units.toString()),
+        units: parseInt(units.toString()),
         deposit,
         observations
     },
     product_id: productId
+})
+
+export const movementToUpdateRequest = ({date, shippingCode, units, deposit, observations}: ProductMovement) => ({
+    date,
+    shipping_code: shippingCode,
+    units: parseInt(units.toString()),
+    deposit,
+    observations
+})
+
+export const updateResponseToMovement = ({id, date, shipping_code, units, deposit, observations}: any): ProductMovement => ({
+    id,
+    date,
+    shippingCode: shipping_code,
+    units,
+    deposit,
+    observations,
+    movementId: 0,
+    productId: 0,
+    name: "",
+    code: "",
+    brand: "",
+    detail: "",
+    companyId: 0,
 })

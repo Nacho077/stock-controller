@@ -1,8 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { setInitialMovements, setError, setActualCompany, addMovement, setInitialProducts, addProduct, updateProduct } from '../redux/slice'
+import { setInitialMovements, setError, setActualCompany, addMovement, setInitialProducts, addProduct, updateProduct, setTotalUnits, updateMovement } from '../redux/slice'
 import { ApiError } from './apiError'
-import { movementToRequest, productMovementToMovementTable, productToDomain } from '../../utils/mapper'
-import { ProductMovement } from '../../views/movements/interfaces'
+import { movementToCreateRequest, movementToUpdateRequest, productMovementToMovementTable, productToDomain, updateResponseToMovement } from '../../utils/mapper'
 
 export const api = createApi({
     baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8080/', timeout: 1000 }),
@@ -17,10 +16,13 @@ export const api = createApi({
                 }
             }
         }),
-        getProductsMovementsByCompanyId: builder.query({
-            query: (companyId: number) => ({url: `/company/${companyId}/movements?page_size=50`}),
+        getProductsMovementsFiltered: builder.mutation({
+            query: ({ companyId, filters }) => ({
+                url: `/company/${companyId}/movements?page_size=50&name=${filters.name}&brand=${filters.brand}&code=${filters.code}`
+            }),
             transformResponse: (response: any) => ({
               companyName: response["company_name"],
+              totalUnits: response["total_units"],
               movements: response.movements.map((m: any) => productMovementToMovementTable(m))
             }),
             async onQueryStarted({}, {dispatch, queryFulfilled}) {
@@ -28,23 +30,39 @@ export const api = createApi({
                     const result = await queryFulfilled
                     dispatch(setActualCompany(result.data.companyName))
                     dispatch(setInitialMovements(result.data.movements))
+                    dispatch(setTotalUnits(result.data.totalUnits))
                 } catch (err: any) {
                     dispatch(setError(err.error as ApiError))
                 }
             }
         }),
         addNewMovement: builder.mutation({
-            query: ({ companyId, newMovement }) => {
-                return {
-                    url: `/company/${companyId}/movements`,
-                    method: 'POST',
-                    body: movementToRequest(newMovement)
-                }
-            },
-            async onQueryStarted({ }, { dispatch, queryFulfilled }) {
+            query: ({ companyId, newMovement }) => ({
+                url: `/company/${companyId}/movements`,
+                method: 'POST',
+                body: movementToCreateRequest(newMovement)
+            }),
+            transformResponse: response => productMovementToMovementTable(response),
+            async onQueryStarted({}, {dispatch, queryFulfilled}) {
                 try {
                     const result = await queryFulfilled
                     dispatch(addMovement(result.data))
+                } catch (err: any) {
+                    dispatch(setError(err.error as ApiError))
+                }
+            }
+        }),
+        updateMovement: builder.mutation({
+            query: ({companyId, movementId, body}) => ({
+                url: `company/${companyId}/movements/${movementId}`,
+                method: 'PUT',
+                body: movementToUpdateRequest(body)
+            }),
+            transformResponse: response => updateResponseToMovement(response),
+            async onQueryStarted({}, {dispatch, queryFulfilled}) {
+                try {
+                    const result = await queryFulfilled
+                    dispatch(updateMovement(result.data))
                 } catch (err: any) {
                     dispatch(setError(err.error as ApiError))
                 }
