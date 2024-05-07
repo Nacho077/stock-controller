@@ -145,7 +145,8 @@ export const getDefaultMovement = (
     companyId: number,
     date = "",
     shippingCode = "",
-    code = ""
+    code = "",
+    productId = 0
 ): ProductMovement => ({
     id: 0,
     movementId: 0,
@@ -153,7 +154,7 @@ export const getDefaultMovement = (
     units: 0,
     deposit: "",
     observations: "",
-    productId: 0,
+    productId: productId,
     name: "",
     brand: "",
     detail: "",

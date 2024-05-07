@@ -1,6 +1,6 @@
 import { ChangeEvent, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useAppSelector, useCreateNewMovement } from '../../hooks'
+import { useAppSelector, useCreateNewMovement, useCreateNewProduct } from '../../hooks'
 
 import UpdatableTableWithFilters from '../../components/updatableTableWithFilters'
 
@@ -20,6 +20,7 @@ const Movements: React.FC = () => {
     const [movementForm, setMovementForm] = useState<ProductMovement>(getDefaultMovement(companyId))
     const createNewMovement = useCreateNewMovement()
     const updateMovement = useUpdateMovement()
+    const createNewProduct = useCreateNewProduct()
     const [isLoading, setLoading] = useState<boolean>(false)
 
     const updateMovements = (filters: ProductFilters) => {
@@ -89,18 +90,39 @@ const Movements: React.FC = () => {
         setMovementForm(getDefaultMovement(companyId))
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        let request = movementForm
+
         if (movementForm.movementId === 0) {
-            createNewMovement(companyId, movementForm)
+            if (!movementForm.productId && movementForm.code !== "") {
+                const result = await createNewProduct({
+                    id: 0,
+                    name: movementForm.name,
+                    code: movementForm.code,
+                    brand: movementForm.brand,
+                    detail: movementForm.detail,
+                    company_id: companyId,
+                })
+                
+                if ('data' in result) {
+                    request = {
+                        ...movementForm,
+                        productId: result.data.id
+                    }
+                }
+            }
+
+            createNewMovement(companyId, request)
         } else {
             updateMovement(companyId, movementForm.movementId, movementForm)
         }
 
         setMovementForm(getDefaultMovement(
             companyId,
-            movementForm.date,
-            movementForm.shippingCode,
-            movementForm.code
+            request.date,
+            request.shippingCode,
+            request.code,
+            request.productId
         ))
     }
 
