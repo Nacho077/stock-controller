@@ -30,7 +30,7 @@ func (repository Repository) GetProducts(product types.Product) ([]types.Product
 	if rows != nil {
 		var product types.Product
 		for rows.Next() {
-			err = rows.Scan(&product.Id, &product.Name, &product.Code, &product.Brand, &product.Detail, &product.CompanyId)
+			err = rows.Scan(&product.Id, &product.Code, &product.Name, &product.Brand, &product.Detail, &product.CompanyId)
 			if err != nil {
 				return nil, errors.NewInternalServerError("Error in scan when trying get product", err.Error())
 			}
@@ -81,7 +81,10 @@ func (repository Repository) CreateProductIfNotExist(product types.Product) (*in
 
 func (repository Repository) CreateProduct(product types.Product) (*int64, error) {
 	productQueries := types.ProductQueries{Product: product}
-	query, values := productQueries.CreateQuery()
+	query, values, err := productQueries.CreateQuery()
+	if err != nil {
+		return nil, err
+	}
 
 	result, err := repository.Db.Exec(query, values...)
 	if err != nil {
