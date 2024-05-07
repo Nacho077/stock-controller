@@ -1,6 +1,7 @@
 import { getDateNowString } from '../../utils/date';
 import { FormFields } from '../../components/form/interfaces';
 import { Header, Row } from '../../components/table/interfaces';
+import { Product } from '../products/interfaces';
 
 export interface ProductMovement extends Row {
     movementId: number
@@ -23,26 +24,28 @@ export interface ProductFilters {
     brand: string
 }
 
-export const MovementsFiltersFields: FormFields[] = [
+const removeDuplicates = (arr: any[]) => [...new Set(arr)]
+
+export const movementsFiltersFields =  (products: Product[]): FormFields[] => [
     {
         label: "codigo",
         type: "text",
         name: "code",
-        datalist: [],
+        datalist: removeDuplicates(products.map(p => p.code.trim().toLowerCase())),
         autoComplete: "off"
     },
     {
         label: "aparato",
         type: "text",
         name: "name",
-        datalist: [],
+        datalist: removeDuplicates(products.map(p => p.name.trim().toLowerCase())),
         autoComplete: "off"
     },
     {
         label: "marca",
         type: "text",
         name: "brand",
-        datalist: [],
+        datalist: removeDuplicates(products.map(p => p.brand.trim().toLowerCase())),
         autoComplete: "off"
     },
 ]
@@ -59,7 +62,7 @@ export const movementHeaders: Header[] = [
     { key: "observations", value: "observación" }
 ]
 
-export const movementFormFields = (isUpdate: boolean): FormFields[] => [
+export const movementFormFields = (isUpdate: boolean, products: Product[]): FormFields[] => [
     {
         label: "fecha",
         type: "date",
@@ -80,10 +83,10 @@ export const movementFormFields = (isUpdate: boolean): FormFields[] => [
         label: "codigo",
         type: "text",
         name: "code",
-        datalist: [],
+        datalist: removeDuplicates(products.map(p => p.code.trim().toLowerCase())),
         required: true,
         autoComplete: "off",
-        disabled: isUpdate && true,
+        disabled: isUpdate,
     },
     {
         label: "unidades",
@@ -96,17 +99,17 @@ export const movementFormFields = (isUpdate: boolean): FormFields[] => [
         label: "aparato",
         type: "text",
         name: "name",
-        datalist: [],
+        datalist: removeDuplicates(products.map(p => p.name.trim().toLowerCase())),
         autoComplete: "off",
-        disabled: isUpdate && true,
+        disabled: isUpdate,
     },
     {
         label: "marca",
         type: "text",
         name: "brand",
-        datalist: [],
+        datalist: removeDuplicates(products.map(p => p.brand.trim().toLowerCase())),
         autoComplete: "off",
-        disabled: isUpdate && true,
+        disabled: isUpdate,
     },
     {
         label: "detalle",
@@ -114,7 +117,7 @@ export const movementFormFields = (isUpdate: boolean): FormFields[] => [
         name: "detail",
         datalist: [],
         autoComplete: "off",
-        disabled: isUpdate && true,
+        disabled: isUpdate,
     },
     {
         label: "deposito",
@@ -142,7 +145,8 @@ export const getDefaultMovement = (
     companyId: number,
     date = "",
     shippingCode = "",
-    code = ""
+    code = "",
+    productId = 0
 ): ProductMovement => ({
     id: 0,
     movementId: 0,
@@ -150,7 +154,7 @@ export const getDefaultMovement = (
     units: 0,
     deposit: "",
     observations: "",
-    productId: 0,
+    productId: productId,
     name: "",
     brand: "",
     detail: "",

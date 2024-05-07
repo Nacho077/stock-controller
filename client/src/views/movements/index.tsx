@@ -1,14 +1,15 @@
 import { ChangeEvent, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useAppSelector, useCreateNewMovement } from '../../hooks'
+import { useAppSelector, useCreateNewMovement, useCreateNewProduct } from '../../hooks'
 
 import UpdatableTableWithFilters from '../../components/updatableTableWithFilters'
 
-import { MovementsFiltersFields, ProductFilters, ProductMovement, getDefaultFilters, getDefaultMovement, movementFormFields, movementHeaders } from './interfaces'
+import { movementsFiltersFields, ProductFilters, ProductMovement, getDefaultFilters, getDefaultMovement, movementFormFields, movementHeaders } from './interfaces'
 
 import styles from './movements.module.scss'
 import { Link } from 'react-router-dom'
 import { useGetProductsByCompanyId, useGetProductsMovementsFiltered, useUpdateMovement } from '../../hooks'
+import { Product } from '../products/interfaces'
 
 const Movements: React.FC = () => {
     const companyId = parseInt(useParams()["companyId"] || '0', 10)
@@ -19,6 +20,7 @@ const Movements: React.FC = () => {
     const [movementForm, setMovementForm] = useState<ProductMovement>(getDefaultMovement(companyId))
     const createNewMovement = useCreateNewMovement()
     const updateMovement = useUpdateMovement()
+    const createNewProduct = useCreateNewProduct()
     const [isLoading, setLoading] = useState<boolean>(false)
 
     const updateMovements = (filters: ProductFilters) => {
@@ -29,14 +31,15 @@ const Movements: React.FC = () => {
 
     useEffect(() => updateMovements(filters), [])
 
+
     const autoCompleteFields = <T extends ProductFilters | ProductMovement>(state: T, codeToFind: string): T => {
         const movement = rows.find(row => row.code?.toLowerCase() == codeToFind?.toLowerCase())
-        const productFounded = products.find(product => product.name?.toLowerCase() == codeToFind?.toLowerCase())
+        const productFounded = products.find(product => product.code?.toLowerCase() == codeToFind?.toLowerCase())
 
         return {
             ...state,
-            brand: movement?.brand || state.brand,
-            name: movement?.name || state.name,
+            brand: movement?.brand || productFounded?.brand || state.brand,
+            name: movement?.name || productFounded?.name || state.name,
             detail: movement?.detail || (state as ProductMovement).detail,
             deposit: movement?.deposit || (state as ProductMovement).deposit,
             observations: movement?.observations || (state as ProductMovement).observations,
@@ -87,19 +90,50 @@ const Movements: React.FC = () => {
         setMovementForm(getDefaultMovement(companyId))
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        let request = movementForm
+
         if (movementForm.movementId === 0) {
-            createNewMovement(companyId, movementForm)
+            if (!movementForm.productId && movementForm.code !== "") {
+                const result = await createNewProduct({
+                    id: 0,
+                    name: movementForm.name,
+                    code: movementForm.code,
+                    brand: movementForm.brand,
+                    detail: movementForm.detail,
+                    company_id: companyId,
+                })
+                
+                if ('data' in result) {
+                    request = {
+                        ...movementForm,
+                        productId: result.data.id
+                    }
+                }
+            }
+
+            createNewMovement(companyId, request)
         } else {
             updateMovement(companyId, movementForm.movementId, movementForm)
         }
 
         setMovementForm(getDefaultMovement(
             companyId,
-            movementForm.date,
-            movementForm.shippingCode,
-            movementForm.code
+            request.date,
+            request.shippingCode,
+            request.code,
+            request.productId
         ))
+    }
+
+    const getAvailableProductsToAutocomplete = <T extends ProductFilters | ProductMovement>(form: T): Product[] => {
+        if (form.code === "" && form.name === "" && form.brand === "") return products
+    
+        return products.filter(product => 
+            (form.code !== "" && product.code.includes(movementForm.code)) ||
+            (form.name !== "" && product.name.includes(movementForm.name)) ||
+            (form.brand !== "" && product.brand.includes(movementForm.brand))
+        )
     }
 
     return (
@@ -107,7 +141,7 @@ const Movements: React.FC = () => {
             className={styles.containerMain}
             isLoading={isLoading}
             filters={{
-                fields: MovementsFiltersFields,
+                fields: movementsFiltersFields(getAvailableProductsToAutocomplete(filters)),
                 buttons: [{
                     title: "Vaciar Filtros",
                     type: "reset"
@@ -128,7 +162,7 @@ const Movements: React.FC = () => {
             }}
             form={{
                 title: movementForm.movementId === 0 ? "Nuevo Movimiento" : "Modificar Movimiento",
-                fields: movementFormFields(movementForm.movementId !== 0),
+                fields: movementFormFields(movementForm.movementId !== 0, getAvailableProductsToAutocomplete(movementForm)),
                 buttons: [{
                     title: "Limpiar",
                     type: "reset"
