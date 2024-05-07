@@ -1,6 +1,9 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/stock-controller/app/errors"
+)
 
 type ProductQueries struct {
 	Product
@@ -35,22 +38,19 @@ func (q ProductQueries) GetQuery() (string, []interface{}) {
 	return query, values
 }
 
-func (q ProductQueries) CreateQuery() (string, []interface{}) {
-	values := []interface{}{q.CompanyId}
-	emptyValues := "?"
-	valueNames := "company_id"
-
-	if q.Name != nil && *q.Name != "" {
-		emptyValues += ", ?"
-		valueNames += ", name"
-		values = append(values, q.Name)
+func (q ProductQueries) CreateQuery() (string, []interface{}, error) {
+	if q.Code == "" {
+		return "", []interface{}{}, errors.NewBadRequestError("Code is required", "User Error")
 	}
 
-	if q.Code != "" {
-		emptyValues += ", ?"
-		valueNames += ", code"
-		values = append(values, q.Code)
+	if q.Name == nil {
+		newName := ""
+		q.Name = &newName
 	}
+
+	values := []interface{}{q.CompanyId, q.Code, q.Name}
+	emptyValues := "?, ?, ?"
+	valueNames := "company_id, code, name"
 
 	if q.Brand != nil && *q.Brand != "" {
 		emptyValues += ", ?"
@@ -66,7 +66,7 @@ func (q ProductQueries) CreateQuery() (string, []interface{}) {
 
 	query := fmt.Sprintf("INSERT INTO product(%s) VALUES (%s)", valueNames, emptyValues)
 
-	return query, values
+	return query, values, nil
 }
 
 func (q ProductQueries) UpdateQuery() (string, []interface{}) {
