@@ -4,11 +4,12 @@ import { useAppSelector, useCreateNewMovement } from '../../hooks'
 
 import UpdatableTableWithFilters from '../../components/updatableTableWithFilters'
 
-import { MovementsFiltersFields, ProductFilters, ProductMovement, getDefaultFilters, getDefaultMovement, movementFormFields, movementHeaders } from './interfaces'
+import { movementsFiltersFields, ProductFilters, ProductMovement, getDefaultFilters, getDefaultMovement, movementFormFields, movementHeaders } from './interfaces'
 
 import styles from './movements.module.scss'
 import { Link } from 'react-router-dom'
 import { useGetProductsByCompanyId, useGetProductsMovementsFiltered, useUpdateMovement } from '../../hooks'
+import { Product } from '../products/interfaces'
 
 const Movements: React.FC = () => {
     const companyId = parseInt(useParams()["companyId"] || '0', 10)
@@ -32,12 +33,12 @@ const Movements: React.FC = () => {
 
     const autoCompleteFields = <T extends ProductFilters | ProductMovement>(state: T, codeToFind: string): T => {
         const movement = rows.find(row => row.code?.toLowerCase() == codeToFind?.toLowerCase())
-        const productFounded = products.find(product => product.name?.toLowerCase() == codeToFind?.toLowerCase())
+        const productFounded = products.find(product => product.code?.toLowerCase() == codeToFind?.toLowerCase())
 
         return {
             ...state,
-            brand: movement?.brand || state.brand,
-            name: movement?.name || state.name,
+            brand: movement?.brand || productFounded?.brand || state.brand,
+            name: movement?.name || productFounded?.name || state.name,
             detail: movement?.detail || (state as ProductMovement).detail,
             deposit: movement?.deposit || (state as ProductMovement).deposit,
             observations: movement?.observations || (state as ProductMovement).observations,
@@ -103,13 +104,13 @@ const Movements: React.FC = () => {
         ))
     }
 
-    const getAvailableProductsToAutocomplete = () => {
-        if (movementForm.code === "" && movementForm.name === "" && movementForm.brand === "") return products
+    const getAvailableProductsToAutocomplete = <T extends ProductFilters | ProductMovement>(form: T): Product[] => {
+        if (form.code === "" && form.name === "" && form.brand === "") return products
     
         return products.filter(product => 
-            (movementForm.code !== "" && product.code.includes(movementForm.code)) ||
-            (movementForm.name !== "" && product.name.includes(movementForm.name)) ||
-            (movementForm.brand !== "" && product.brand.includes(movementForm.brand))
+            (form.code !== "" && product.code.includes(movementForm.code)) ||
+            (form.name !== "" && product.name.includes(movementForm.name)) ||
+            (form.brand !== "" && product.brand.includes(movementForm.brand))
         )
     }
 
@@ -118,7 +119,7 @@ const Movements: React.FC = () => {
             className={styles.containerMain}
             isLoading={isLoading}
             filters={{
-                fields: MovementsFiltersFields,
+                fields: movementsFiltersFields(getAvailableProductsToAutocomplete(filters)),
                 buttons: [{
                     title: "Vaciar Filtros",
                     type: "reset"
@@ -139,7 +140,7 @@ const Movements: React.FC = () => {
             }}
             form={{
                 title: movementForm.movementId === 0 ? "Nuevo Movimiento" : "Modificar Movimiento",
-                fields: movementFormFields(movementForm.movementId !== 0, getAvailableProductsToAutocomplete()),
+                fields: movementFormFields(movementForm.movementId !== 0, getAvailableProductsToAutocomplete(movementForm)),
                 buttons: [{
                     title: "Limpiar",
                     type: "reset"

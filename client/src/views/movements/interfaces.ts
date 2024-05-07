@@ -24,26 +24,28 @@ export interface ProductFilters {
     brand: string
 }
 
-export const MovementsFiltersFields: FormFields[] = [
+const removeDuplicates = (arr: any[]) => [...new Set(arr)]
+
+export const movementsFiltersFields =  (products: Product[]): FormFields[] => [
     {
         label: "codigo",
         type: "text",
         name: "code",
-        datalist: [],
+        datalist: removeDuplicates(products.map(p => p.code.trim().toLowerCase())),
         autoComplete: "off"
     },
     {
         label: "aparato",
         type: "text",
         name: "name",
-        datalist: [],
+        datalist: removeDuplicates(products.map(p => p.name.trim().toLowerCase())),
         autoComplete: "off"
     },
     {
         label: "marca",
         type: "text",
         name: "brand",
-        datalist: [],
+        datalist: removeDuplicates(products.map(p => p.brand.trim().toLowerCase())),
         autoComplete: "off"
     },
 ]
@@ -59,8 +61,6 @@ export const movementHeaders: Header[] = [
     { key: "deposit", value: "deposito" },
     { key: "observations", value: "observación" }
 ]
-
-const removeDuplicates = (arr: any[]) => [...new Set(arr)]
 
 export const movementFormFields = (isUpdate: boolean, products: Product[]): FormFields[] => [
     {
