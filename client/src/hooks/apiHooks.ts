@@ -1,9 +1,12 @@
 import { api } from '../configs/api/apiconfig.ts'
+import { Company } from '../views/companies/interfaces.ts'
 import { ProductFilters, ProductMovement } from '../views/movements/interfaces.ts'
 import { Product } from '../views/products/interfaces.ts'
 
 const {
     useGetCompaniesQuery,
+    useAddNewCompanyMutation,
+    useUpdateCompanyMutation,
     useGetProductsMovementsFilteredMutation,
     useAddNewMovementMutation,
     useUpdateMovementMutation,
@@ -12,11 +15,6 @@ const {
     useUpdateProductMutation,
 } = api
 
-interface Company {
-    readonly id: number
-    name: string
-}
-
 interface UseGetCompaniesResult {
     data: Company[]
     isLoading: boolean
@@ -24,15 +22,23 @@ interface UseGetCompaniesResult {
 
 export const useGetCompanies: () => UseGetCompaniesResult = () => {
     const result = useGetCompaniesQuery({})
-    const defaultCompany = {
-        id: "create",
-        name: "Crea una nueva empresa"
-    }
 
     return {
-        data: [defaultCompany, ...result.data || []],
+        data: result.data || [],
         isLoading: result.isLoading
     }
+}
+
+export const useCreateNewCompany = () => {
+    const [mutate, {}] = useAddNewCompanyMutation()
+
+    return (company: Company) => mutate(company)
+}
+
+export const useUpdateCompany = () => {
+    const [mutate, {}] = useUpdateCompanyMutation()
+
+    return (companyId: number, body: Company) => mutate({companyId, body})
 }
 
 export const useGetProductsMovementsFiltered = () => {

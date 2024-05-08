@@ -14,48 +14,47 @@ import styles from './app.module.scss'
 import { clearError } from './configs/redux/slice'
 
 function App() {
-  const [isModalOpen, setModalOpen] = useState<boolean>(false)
-  const [modalData, setModalData] = useState<ModalData>({ text: "", buttons: [] })
-  const error = useAppSelector(state => state.reducer.error)
-  const dispatch = useAppDispatch()
+    const [isModalOpen, setModalOpen] = useState<boolean>(false)
+    const [modalData, setModalData] = useState<ModalData>({ text: "", buttons: [] })
+    const error = useAppSelector(state => state.reducer.error)
+    const dispatch = useAppDispatch()
 
-  useEffect(() => {
-    if (error !== "") {
-      showModal({
-        text: error,
-        buttons: [{
-          text: "Aceptar",
-          onClick: hideModal
-        }]
-      })
-    }
+    useEffect(() => {
+        if (error !== "") {
+            showModal({
+                text: error,
+                buttons: [{
+                text: "Aceptar",
+                onClick: hideModal
+                }]
+            })
+        }
   }, [error])
 
-  const showModal = (modalData: ModalData) => {
-    setModalData(modalData)
+    const showModal = (modalData: ModalData) => {
+        setModalData(modalData)
 
-    setModalOpen(true)
-  }
+        setModalOpen(true)
+    }
 
-  const hideModal = () => {
-    dispatch(clearError())
-    setModalOpen(false)
-  }
+    const hideModal = () => {
+        dispatch(clearError())
+        setModalOpen(false)
+    }
 
   return (
     <>
-      <div className={styles.containerMain}>
-        {isModalOpen && <div className={styles.modalContainer}><Modal data={modalData} onClose={hideModal} /></div>}
-        <NavBar />
-        <main>
-          <Routes>
-            <Route path="/" element={<Companies />} />
-            <Route path="/company/create" element={<h1>TEST</h1>} />
-            <Route path="/company/:companyId" element={<Movements />} />
-            <Route path="/company/:companyId/products" element={<Products />} />
-          </Routes>
-        </main>
-      </div>
+        <div className={styles.containerMain}>
+            {isModalOpen && <div className={styles.modalContainer}><Modal data={modalData} onClose={hideModal} /></div>}
+            <NavBar />
+            <main>
+                <Routes>
+                    <Route path="/" element={<Companies />} />
+                    <Route path="/company/:companyId" element={<Movements />} />
+                    <Route path="/company/:companyId/products" element={<Products />} />
+                </Routes>
+            </main>
+        </div>
     </>
   )
 }

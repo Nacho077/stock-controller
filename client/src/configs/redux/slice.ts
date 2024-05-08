@@ -2,9 +2,11 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 import { ApiError } from '../api/apiError.ts'
 import { ProductMovement } from '../../views/movements/interfaces.ts'
 import { Product } from '../../views/products/interfaces.ts'
+import { Company } from '../../views/companies/interfaces.ts'
 
 interface InitialState {
-    error: string
+    error: string,
+    companies: Company[],
     movements: ProductMovement[],
     actualCompany: string,
     products: Product[],
@@ -13,6 +15,7 @@ interface InitialState {
 
 const initialState: InitialState = {
     error: '',
+    companies: [],
     movements: [],
     actualCompany: 'Movimientos',
     products: [],
@@ -24,11 +27,25 @@ const slice = createSlice({
     initialState,
     reducers: {
         setError: (state, action: PayloadAction<ApiError>) => {
-            console.log(action.payload)
-            state.error = `${action.payload.status} - ${action.payload.data ?? action.payload.error}`
+            console.error(action.payload)
+            state.error = `${action.payload.status ?? action.payload.name} - ${action.payload.data ?? action.payload.error ?? action.payload.message}`
         },
         clearError: (state) => {
             state.error = ''
+        },
+        setCompanies: (state, action: PayloadAction<Company[]>) => {
+            state.companies = action.payload
+        },
+        addCompany: (state, action: PayloadAction<Company>) => {
+            state.companies.unshift(action.payload)
+        },
+        updateCompany: (state, action: PayloadAction<Company>) => {
+            for (let i = 0; i < state.companies.length; i++) {
+                if (state.companies[i].id == action.payload.id) {
+                    state.companies[i] = action.payload
+                    break
+                }
+            }
         },
         setActualCompany: (state, action: PayloadAction<string>) => {
           state.actualCompany = action.payload
@@ -71,6 +88,6 @@ const slice = createSlice({
     }
 })
 
-export const { setError, clearError, setActualCompany, setInitialMovements, setTotalUnits, addMovement, updateMovement, setInitialProducts, addProduct, updateProduct} = slice.actions
+export const { setError, clearError, setCompanies, addCompany, updateCompany, setActualCompany, setInitialMovements, setTotalUnits, addMovement, updateMovement, setInitialProducts, addProduct, updateProduct} = slice.actions
 
 export default slice.reducer

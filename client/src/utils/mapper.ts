@@ -1,5 +1,13 @@
+import { Company } from "../views/companies/interfaces"
 import { ProductMovement } from "../views/movements/interfaces"
 import { Product } from "../views/products/interfaces"
+
+export const companyToDomain = (company: any): Company => {
+    return {
+        id: company.id,
+        name: company.name
+    }
+}
 
 export const productMovementToMovementTable = (movement: any): ProductMovement => {
     return {
