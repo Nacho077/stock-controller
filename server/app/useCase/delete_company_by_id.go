@@ -12,14 +12,14 @@ type DeleteCompanyById struct {
 	CompanyRepository repository.CompanyRepositoryInterface
 }
 
-func (this DeleteCompanyById) Handle(ctx *gin.Context) {
+func (u DeleteCompanyById) Handle(ctx *gin.Context) {
 	companyId, err := strconv.ParseInt(ctx.Param("companyId"), 10, 64)
 	if err != nil {
 		ctx.JSON(errors.HandleError(errors.NewBadRequestError("Invalid company id", "User Error")))
 		return
 	}
 
-	err = this.CompanyRepository.DeleteCompanyById(companyId)
+	err = u.CompanyRepository.DeleteCompanyById(companyId)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
 	}

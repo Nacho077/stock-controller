@@ -13,14 +13,14 @@ type BulkCreate struct {
 	BulkCreateRepository repository.BulkCreateRepositoryInterface
 }
 
-func (repository BulkCreate) Handle(ctx *gin.Context) {
-	bodyData, err := repository.getBodyData(ctx)
+func (u BulkCreate) Handle(ctx *gin.Context) {
+	bodyData, err := u.getBodyData(ctx)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return
 	}
 
-	if err = repository.BulkCreateRepository.BulkCreateData(bodyData); err != nil {
+	if err = u.BulkCreateRepository.BulkCreateData(bodyData); err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return
 	}
@@ -28,7 +28,7 @@ func (repository BulkCreate) Handle(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, "data added successfully")
 }
 
-func (repository BulkCreate) getBodyData(ctx *gin.Context) (types.DataToSave, error) {
+func (u BulkCreate) getBodyData(ctx *gin.Context) (types.DataToSave, error) {
 	var bodyData types.DataToSave
 
 	if err := ctx.ShouldBindJSON(&bodyData); err != nil {

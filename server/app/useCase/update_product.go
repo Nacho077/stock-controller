@@ -13,7 +13,7 @@ type UpdateProductById struct {
 	ProductRepository repository.ProductRepositoryInterface
 }
 
-func (this UpdateProductById) Handle(ctx *gin.Context) {
+func (u UpdateProductById) Handle(ctx *gin.Context) {
 	productId, err := strconv.ParseInt(ctx.Param("productId"), 10, 64)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
@@ -30,13 +30,13 @@ func (this UpdateProductById) Handle(ctx *gin.Context) {
 
 	product.Id = &productId
 
-	err = this.ProductRepository.UpdateProductById(product)
+	err = u.ProductRepository.UpdateProductById(product)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return
 	}
 
-	productUpdated, err := this.ProductRepository.GetProductById(productId)
+	productUpdated, err := u.ProductRepository.GetProductById(productId)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return

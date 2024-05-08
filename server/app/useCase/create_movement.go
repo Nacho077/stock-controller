@@ -13,7 +13,7 @@ type CreateMovement struct {
 	MovementRepository repository.MovementRepositoryInterface
 }
 
-func (this CreateMovement) Handle(ctx *gin.Context) {
+func (u CreateMovement) Handle(ctx *gin.Context) {
 	var movementWithProductId types.MovementWithProductId
 
 	companyId, err := strconv.ParseInt(ctx.Param("companyId"), 10, 64)
@@ -30,7 +30,7 @@ func (this CreateMovement) Handle(ctx *gin.Context) {
 		return
 	}
 
-	movementId, err := this.MovementRepository.CreateMovement(movementWithProductId.Movement, &movementWithProductId.ProductId)
+	movementId, err := u.MovementRepository.CreateMovement(movementWithProductId.Movement, &movementWithProductId.ProductId)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return
@@ -38,7 +38,7 @@ func (this CreateMovement) Handle(ctx *gin.Context) {
 
 	filters := types.MovementFilters{MovementId: movementId}
 
-	movementsFound, err := this.MovementRepository.GetMovementsByCompanyId(companyId, nil, filters)
+	movementsFound, err := u.MovementRepository.GetMovementsByCompanyId(companyId, nil, filters)
 
 	if len(movementsFound.Movements) == 0 {
 		ctx.JSON(errors.HandleError(errors.NewBadRequestError("The product Id sent does not exist in this company.", "User Error")))

@@ -15,7 +15,7 @@ const Movements: React.FC = () => {
     const companyId = parseInt(useParams()["companyId"] || '0', 10)
     const useFilters = useGetProductsMovementsFiltered()
     useGetProductsByCompanyId(companyId)
-    const {movements: rows, totalUnits, products} = useAppSelector(state => state.reducer)
+    const { movements: rows, totalUnits, products } = useAppSelector(state => state.reducer)
     const [filters, setFilters] = useState<ProductFilters>(getDefaultFilters())
     const [movementForm, setMovementForm] = useState<ProductMovement>(getDefaultMovement(companyId))
     const createNewMovement = useCreateNewMovement()
@@ -23,10 +23,14 @@ const Movements: React.FC = () => {
     const createNewProduct = useCreateNewProduct()
     const [isLoading, setLoading] = useState<boolean>(false)
 
+    useEffect(() => {
+        useFilters(companyId, filters)
+    }, [])
+
     const updateMovements = (filters: ProductFilters) => {
         setLoading(true)
         useFilters(companyId, filters)
-        .then(() => setLoading(false))
+            .then(() => setLoading(false))
     }
 
     useEffect(() => updateMovements(filters), [])
@@ -63,8 +67,8 @@ const Movements: React.FC = () => {
     }
 
     const clearFilters = () => {
-      setFilters(getDefaultFilters())
-      updateMovements(getDefaultFilters())
+        setFilters(getDefaultFilters())
+        updateMovements(getDefaultFilters())
     }
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -103,7 +107,7 @@ const Movements: React.FC = () => {
                     detail: movementForm.detail,
                     company_id: companyId,
                 })
-                
+
                 if ('data' in result) {
                     request = {
                         ...movementForm,
@@ -128,8 +132,8 @@ const Movements: React.FC = () => {
 
     const getAvailableProductsToAutocomplete = <T extends ProductFilters | ProductMovement>(form: T): Product[] => {
         if (form.code === "" && form.name === "" && form.brand === "") return products
-    
-        return products.filter(product => 
+
+        return products.filter(product =>
             (form.code !== "" && product.code.includes(movementForm.code)) ||
             (form.name !== "" && product.name.includes(movementForm.name)) ||
             (form.brand !== "" && product.brand.includes(movementForm.brand))

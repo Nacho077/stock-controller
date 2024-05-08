@@ -13,7 +13,7 @@ type UpdateCompanyById struct {
 	CompanyRepository repository.CompanyRepositoryInterface
 }
 
-func (this UpdateCompanyById) Handle(ctx *gin.Context) {
+func (u UpdateCompanyById) Handle(ctx *gin.Context) {
 	companyId, err := strconv.ParseInt(ctx.Param("companyId"), 10, 64)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
@@ -35,7 +35,7 @@ func (this UpdateCompanyById) Handle(ctx *gin.Context) {
 		return
 	}
 
-	err = this.CompanyRepository.UpdateCompanyById(company)
+	err = u.CompanyRepository.UpdateCompanyById(company)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return

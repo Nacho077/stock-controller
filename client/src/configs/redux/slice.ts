@@ -48,13 +48,16 @@ const slice = createSlice({
             }
         },
         setActualCompany: (state, action: PayloadAction<string>) => {
-          state.actualCompany = action.payload
+            state.actualCompany = action.payload
         },
         setInitialMovements: (state, action: PayloadAction<ProductMovement[]>) => {
             state.movements = action.payload
         },
         setTotalUnits: (state, action: PayloadAction<number>) => {
             state.totalUnits = action.payload
+        },
+        incrementTotalUnits: (state, action: PayloadAction<number>) => {
+            state.totalUnits = state.totalUnits + action.payload
         },
         addMovement: (state, action: PayloadAction<ProductMovement>) => {
             state.movements.unshift(action.payload)
@@ -88,6 +91,6 @@ const slice = createSlice({
     }
 })
 
-export const { setError, clearError, setCompanies, addCompany, updateCompany, setActualCompany, setInitialMovements, setTotalUnits, addMovement, updateMovement, setInitialProducts, addProduct, updateProduct} = slice.actions
+export const { setError, clearError, setCompanies, addCompany, updateCompany, setActualCompany, setInitialMovements, setTotalUnits, incrementTotalUnits, addMovement, updateMovement, setInitialProducts, addProduct, updateProduct } = slice.actions
 
 export default slice.reducer
