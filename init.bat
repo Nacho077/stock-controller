@@ -1,5 +1,8 @@
 @echo off
-echo Ejecutando...
+echo Actualizando...
+git pull
+
+echo Ejecutando... Presiona cualquier tecla para finalizar
 
 start /MIN cmd /c "cd ./client && npm start"
 start "Server" /MIN cmd /c "cd ./server && go run ./main.go"
