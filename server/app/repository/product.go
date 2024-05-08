@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	goErrors "errors"
+	"github.com/go-sql-driver/mysql"
 	"github.com/stock-controller/app/errors"
 	"github.com/stock-controller/app/types"
 )
@@ -115,7 +116,12 @@ func (repository Repository) UpdateProductById(product types.Product) error {
 func (repository Repository) DeleteProductById(id int64) error {
 	_, err := repository.Db.Exec("DELETE FROM product WHERE id = ?", id)
 	if err != nil {
-		return errors.NewFailedDependencyError("Error in deleting product", err.Error())
+		var mysqlErr *mysql.MySQLError
+		if goErrors.As(err, &mysqlErr) && mysqlErr.Number == 1451 {
+			return errors.NewFailedDependencyError("This product has movements associated", err.Error())
+		}
+
+		return errors.NewFailedDependencyError("This product has movements associated", err.Error())
 	}
 
 	return nil
