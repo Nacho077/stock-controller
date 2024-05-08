@@ -12,7 +12,7 @@ type CreateProduct struct {
 	ProductRepository repository.ProductRepositoryInterface
 }
 
-func (repository CreateProduct) Handle(ctx *gin.Context) {
+func (u CreateProduct) Handle(ctx *gin.Context) {
 	var product types.Product
 
 	err := ctx.BindJSON(&product)
@@ -26,7 +26,7 @@ func (repository CreateProduct) Handle(ctx *gin.Context) {
 		return
 	}
 
-	productId, exists, err := repository.ProductRepository.CreateProductIfNotExist(product)
+	productId, exists, err := u.ProductRepository.CreateProductIfNotExist(product)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return

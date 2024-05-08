@@ -13,7 +13,7 @@ type GetMovementsByCompany struct {
 	MovementRepository repository.MovementRepositoryInterface
 }
 
-func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
+func (u GetMovementsByCompany) Handle(ctx *gin.Context) {
 	id := ctx.Param("companyId")
 	page := ctx.Query("page")
 	pageSize := ctx.Query("page_size")
@@ -23,7 +23,7 @@ func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
 	orderBy := ctx.Query("order_by")
 	orderDirection := ctx.Query("direction")
 
-	limit, offset, err := repository.getOffset(page, pageSize)
+	limit, offset, err := u.getOffset(page, pageSize)
 	if err != nil {
 		status, errMessage := errors.HandleError(err)
 		ctx.JSON(status, errMessage)
@@ -33,14 +33,14 @@ func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
 	pagination := types.Pagination{Offset: offset, Limit: limit, OrderBy: orderBy, OrderDirection: orderDirection}
 	filters := types.MovementFilters{Code: codeFilter, Name: nameFilter, Brand: brandFilter}
 
-	parsedId, err := repository.validateId(id)
+	parsedId, err := u.validateId(id)
 	if err != nil {
 		status, errMessage := errors.HandleError(err)
 		ctx.JSON(status, errMessage)
 		return
 	}
 
-	movementsResult, err := repository.MovementRepository.GetMovementsByCompanyId(parsedId, &pagination, filters)
+	movementsResult, err := u.MovementRepository.GetMovementsByCompanyId(parsedId, &pagination, filters)
 	if err != nil {
 		status, errMessage := errors.HandleError(err)
 		ctx.JSON(status, errMessage)
@@ -50,7 +50,7 @@ func (repository GetMovementsByCompany) Handle(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, movementsResult)
 }
 
-func (repository GetMovementsByCompany) validateId(id string) (int64, error) {
+func (u GetMovementsByCompany) validateId(id string) (int64, error) {
 	parsedId, err := strconv.ParseInt(id, 10, 64)
 
 	if err != nil {
@@ -64,7 +64,7 @@ func (repository GetMovementsByCompany) validateId(id string) (int64, error) {
 	return parsedId, nil
 }
 
-func (repository GetMovementsByCompany) getOffset(page string, pageSize string) (int, int, error) {
+func (u GetMovementsByCompany) getOffset(page string, pageSize string) (int, int, error) {
 	if page == "" || page == "0" {
 		page = "1"
 	}

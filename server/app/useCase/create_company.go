@@ -13,7 +13,7 @@ type CreateCompany struct {
 	CompanyRepository repository.CompanyRepositoryInterface
 }
 
-func (repository CreateCompany) Handle(ctx *gin.Context) {
+func (u CreateCompany) Handle(ctx *gin.Context) {
 	var company types.Company
 
 	err := ctx.BindJSON(&company)
@@ -23,12 +23,12 @@ func (repository CreateCompany) Handle(ctx *gin.Context) {
 	}
 	name := company.Name
 
-	if err = isNameValid(name); err != nil {
+	if err = u.isNameValid(name); err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return
 	}
 
-	companyId, err := repository.CompanyRepository.CreateCompanyIfNotExist(name)
+	companyId, err := u.CompanyRepository.CreateCompanyIfNotExist(name)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return
@@ -43,7 +43,7 @@ func (repository CreateCompany) Handle(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, company)
 }
 
-func isNameValid(name string) error {
+func (u CreateCompany) isNameValid(name string) error {
 	matched, _ := regexp.MatchString("[0-9]+", name)
 	if matched || name == "" {
 		return errors.NewBadRequestError("Company name is not valid", "User Error")

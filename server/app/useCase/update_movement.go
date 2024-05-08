@@ -13,7 +13,7 @@ type UpdateMovementById struct {
 	MovementRepository repository.MovementRepositoryInterface
 }
 
-func (this UpdateMovementById) Handle(ctx *gin.Context) {
+func (u UpdateMovementById) Handle(ctx *gin.Context) {
 	movementId, err := strconv.ParseInt(ctx.Param("movementId"), 10, 64)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
@@ -30,13 +30,13 @@ func (this UpdateMovementById) Handle(ctx *gin.Context) {
 
 	movement.Id = &movementId
 
-	err = this.MovementRepository.UpdateMovementById(movement)
+	err = u.MovementRepository.UpdateMovementById(movement)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return
 	}
 
-	movementUpdated, err := this.MovementRepository.GetMovementById(movementId)
+	movementUpdated, err := u.MovementRepository.GetMovementById(movementId)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return

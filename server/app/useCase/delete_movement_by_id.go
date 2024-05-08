@@ -12,14 +12,14 @@ type DeleteMovementById struct {
 	MovementRepository repository.MovementRepositoryInterface
 }
 
-func (this DeleteMovementById) Handle(ctx *gin.Context) {
+func (u DeleteMovementById) Handle(ctx *gin.Context) {
 	movementId, err := strconv.ParseInt(ctx.Param("movementId"), 10, 64)
 	if err != nil {
 		ctx.JSON(errors.HandleError(errors.NewBadRequestError("Invalid movement id", "User Error")))
 		return
 	}
 
-	err = this.MovementRepository.DeleteMovementById(movementId)
+	err = u.MovementRepository.DeleteMovementById(movementId)
 	if err != nil {
 		ctx.JSON(errors.HandleError(err))
 		return

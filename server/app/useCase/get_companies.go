@@ -11,8 +11,8 @@ type GetCompanies struct {
 	CompanyRepository repository.CompanyRepositoryInterface
 }
 
-func (repository GetCompanies) Handle(ctx *gin.Context) {
-	companies, err := repository.CompanyRepository.GetCompanies()
+func (u GetCompanies) Handle(ctx *gin.Context) {
+	companies, err := u.CompanyRepository.GetCompanies()
 	if err != nil {
 		status, errMessage := errors.HandleError(err)
 		ctx.JSON(status, errMessage)
