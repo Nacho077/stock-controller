@@ -30,37 +30,38 @@ export const useGetCompanies: () => UseGetCompaniesResult = () => {
 }
 
 export const useCreateNewCompany = () => {
-    const [mutate, {}] = useAddNewCompanyMutation()
+    const [mutate, { }] = useAddNewCompanyMutation()
 
     return (company: Company) => mutate(company)
 }
 
 export const useUpdateCompany = () => {
-    const [mutate, {}] = useUpdateCompanyMutation()
+    const [mutate, { }] = useUpdateCompanyMutation()
 
-    return (companyId: number, body: Company) => mutate({companyId, body})
+    return (companyId: number, body: Company) => mutate({ companyId, body })
 }
 
 export const useGetProductsMovementsFiltered = () => {
-    const [mutate, {}] = useGetProductsMovementsFilteredMutation()
+    const [mutate, { }] = useGetProductsMovementsFilteredMutation()
 
-    return (companyId: number, filters: ProductFilters) => mutate({companyId, filters})
+    return (companyId: number, filters: ProductFilters) => mutate({ companyId, filters })
 }
 
 export const useCreateNewMovement = () => {
-    const [mutate, {}] = useAddNewMovementMutation()
+    const [mutate, { }] = useAddNewMovementMutation()
 
-    return (companyId: number, newMovement: ProductMovement) => mutate({companyId, newMovement})
+    return (companyId: number, newMovement: ProductMovement) => mutate({ companyId, newMovement })
 }
 
 export const useUpdateMovement = () => {
-    const [mutate, {}] = useUpdateMovementMutation()
+    const [mutate, { }] = useUpdateMovementMutation()
 
-    return (companyId: number, movementId: number, body: ProductMovement) => mutate({companyId, movementId, body})
+    return (companyId: number, movementId: number, body: ProductMovement) => mutate({ companyId, movementId, body })
 }
 
 interface UseGetProducts {
-    isLoading: boolean
+    isLoading: boolean,
+    refetch: () => void
 }
 
 type UseGetProductsByCompanyId = (id: number) => UseGetProducts
@@ -69,18 +70,19 @@ export const useGetProductsByCompanyId: UseGetProductsByCompanyId = (id: number)
     const result = useGetProductsByCompanyIdQuery(id)
 
     return {
-        isLoading: result.isLoading
+        isLoading: result.isLoading,
+        refetch: result.refetch
     }
 }
 
 export const useCreateNewProduct = () => {
-    const [mutate, {}] = useAddNewProductMutation()
+    const [mutate, { }] = useAddNewProductMutation()
 
     return (body: Product) => mutate(body)
 }
 
 export const useUpdateProduct = () => {
-    const [mutate, {}] = useUpdateProductMutation()
+    const [mutate, { }] = useUpdateProductMutation()
 
-    return (productId: number, body: Product) => mutate({productId, body})
+    return (productId: number, body: Product) => mutate({ productId, body })
 }

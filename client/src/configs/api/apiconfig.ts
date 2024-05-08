@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { setInitialMovements, setError, setActualCompany, addMovement, setInitialProducts, addProduct, updateProduct, setTotalUnits, updateMovement, setCompanies, addCompany, updateCompany } from '../redux/slice'
+import { setInitialMovements, setError, setActualCompany, addMovement, setInitialProducts, addProduct, updateProduct, setTotalUnits, incrementTotalUnits, updateMovement, setCompanies, addCompany, updateCompany } from '../redux/slice'
 import { ApiError } from './apiError'
 import { companyToDomain, movementToCreateRequest, movementToUpdateRequest, productMovementToMovementTable, productToDomain, updateResponseToMovement } from '../../utils/mapper'
 
@@ -9,7 +9,7 @@ export const api = createApi({
         getCompanies: builder.query({
             query: () => ({ url: '/company/' }),
             transformResponse: (response: any[]) => response?.map(companyToDomain) || [],
-            async onQueryStarted({}, { dispatch, queryFulfilled }) {
+            async onQueryStarted({ }, { dispatch, queryFulfilled }) {
                 try {
                     const result = await queryFulfilled
                     dispatch(setCompanies(result.data))
@@ -25,7 +25,7 @@ export const api = createApi({
                 body: body
             }),
             transformResponse: companyToDomain,
-            async onQueryStarted({}, {dispatch, queryFulfilled}) {
+            async onQueryStarted({ }, { dispatch, queryFulfilled }) {
                 try {
                     const result = await queryFulfilled
                     dispatch(addCompany(result.data))
@@ -35,13 +35,13 @@ export const api = createApi({
             }
         }),
         updateCompany: builder.mutation({
-            query: ({companyId, body}) => ({
+            query: ({ companyId, body }) => ({
                 url: `/company/${companyId}`,
                 method: 'PUT',
                 body: body
             }),
             transformResponse: companyToDomain,
-            async onQueryStarted({}, {dispatch, queryFulfilled}) {
+            async onQueryStarted({ }, { dispatch, queryFulfilled }) {
                 try {
                     const result = await queryFulfilled
                     dispatch(updateCompany(result.data))
@@ -55,11 +55,11 @@ export const api = createApi({
                 url: `/company/${companyId}/movements?page_size=50&name=${filters.name}&brand=${filters.brand}&code=${filters.code}`
             }),
             transformResponse: (response: any) => ({
-              companyName: response["company_name"],
-              totalUnits: response["total_units"],
-              movements: response.movements?.map(productMovementToMovementTable) || []
+                companyName: response["company_name"],
+                totalUnits: response["total_units"],
+                movements: response.movements?.map(productMovementToMovementTable) || []
             }),
-            async onQueryStarted({}, {dispatch, queryFulfilled}) {
+            async onQueryStarted({ }, { dispatch, queryFulfilled }) {
                 try {
                     const result = await queryFulfilled
                     dispatch(setActualCompany(result.data.companyName))
@@ -77,23 +77,24 @@ export const api = createApi({
                 body: movementToCreateRequest(newMovement)
             }),
             transformResponse: productMovementToMovementTable,
-            async onQueryStarted({}, {dispatch, queryFulfilled}) {
+            async onQueryStarted({ }, { dispatch, queryFulfilled }) {
                 try {
                     const result = await queryFulfilled
                     dispatch(addMovement(result.data))
+                    dispatch(incrementTotalUnits(result.data.units))
                 } catch (err: any) {
                     dispatch(setError(err.error as ApiError))
                 }
             }
         }),
         updateMovement: builder.mutation({
-            query: ({companyId, movementId, body}) => ({
+            query: ({ companyId, movementId, body }) => ({
                 url: `company/${companyId}/movements/${movementId}`,
                 method: 'PUT',
                 body: movementToUpdateRequest(body)
             }),
             transformResponse: updateResponseToMovement,
-            async onQueryStarted({}, {dispatch, queryFulfilled}) {
+            async onQueryStarted({ }, { dispatch, queryFulfilled }) {
                 try {
                     const result = await queryFulfilled
                     dispatch(updateMovement(result.data))
@@ -103,9 +104,9 @@ export const api = createApi({
             }
         }),
         getProductsByCompanyId: builder.query({
-            query: (companyId: number) => ({url: `/company/${companyId}/products`}),
+            query: (companyId: number) => ({ url: `/company/${companyId}/products` }),
             transformResponse: (response: any[]) => response?.map(productToDomain) || [],
-            async onQueryStarted({}, {dispatch, queryFulfilled}) {
+            async onQueryStarted({ }, { dispatch, queryFulfilled }) {
                 try {
                     const result = await queryFulfilled
                     dispatch(setInitialProducts(result.data))
@@ -121,7 +122,7 @@ export const api = createApi({
                 body
             }),
             transformResponse: (response: any) => productToDomain(response),
-            async onQueryStarted({}, {dispatch, queryFulfilled}) {
+            async onQueryStarted({ }, { dispatch, queryFulfilled }) {
                 try {
                     const result = await queryFulfilled
                     dispatch(addProduct(result.data))
@@ -131,13 +132,13 @@ export const api = createApi({
             }
         }),
         updateProduct: builder.mutation({
-            query: ({productId, body}) => ({
+            query: ({ productId, body }) => ({
                 url: `/product/${productId}`,
                 method: 'PUT',
                 body
             }),
             transformResponse: productToDomain,
-            async onQueryStarted({}, {dispatch, queryFulfilled}) {
+            async onQueryStarted({ }, { dispatch, queryFulfilled }) {
                 try {
                     const result = await queryFulfilled
                     dispatch(updateProduct(result.data))

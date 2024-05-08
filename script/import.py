@@ -72,6 +72,9 @@ def read_csv_and_send_data(csv_file_path, company_name):
             if pallets.strip() != "" and int(pallets.strip()) > 0:
                 data_object["units"] = 100000
                 data_object["observations"] = "{} {} {}".format(pallets, " pallets", data_object["observations"]).strip()
+
+            if code.strip() == "":
+                data_object["code"] = "CODE"
             
             movements_data.append(data_object)
 
