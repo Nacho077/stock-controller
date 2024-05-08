@@ -1,5 +1,5 @@
 # Requisitos
-- Instalar MySQL
+- Instalar [MySQL](https://dev.mysql.com/downloads/mysql/)
 - Instalar go 1.21+
 - Instalar Node 16.20+
 
@@ -14,3 +14,7 @@ DB_NAME=nombre_tu_db
 ```
 - En windows se puede ejecutar el archivo `init.bat` que levanta automaticamente el proyecto
 - Sino se puede levantar con una terminal en la carpeta `client` ejecutando el comando `npm start` y una terminal en la carpeta `server` ejecutando el comando `go run ./main.go`
+
+# DER
+
+<img src="./assets/db.drawio.png">
